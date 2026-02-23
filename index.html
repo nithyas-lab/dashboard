@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BevGenie · Data Status</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0c1220;
+  --surface: #111827;
+  --card:    #1a2537;
+  --border:  #1f2f45;
+  --text:    #f0f4ff;
+  --muted:   #8899b0;
+  --dim:     #4a5a70;
+
+  --blue:   #3b82f6;
+  --amber:  #f59e0b;
+  --green:  #22c55e;
+  --purple: #a78bfa;
+  --teal:   #2dd4bf;
+
+  --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+}
+.logo span { color: var(--blue); }
+
+.header-right { text-align: right; }
+.header-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.snapshot-time {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
+/* ── MAIN ── */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+/* ── SECTION ── */
+.section { margin-bottom: 56px; }
+
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.section-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.section-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.section-heading {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  margin-bottom: 4px;
+}
+
+.section-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* ── BIG HERO NUMBER ── */
+.hero-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.hero-block {}
+
+.hero-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.hero-num {
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -3px;
+  font-family: var(--mono);
+}
+
+.hero-context {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: blink 2.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
+
+/* ── STAT CARDS ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+@media(max-width:780px) { .cards { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:480px) { .cards { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s, border-color .15s;
+}
+.card:hover {
+  transform: translateY(-2px);
+  border-color: #2a3f5f;
+}
+
+.card-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 2px 2px 0 0;
+}
+
+.card-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.card-value {
+  font-size: 30px;
+  font-weight: 800;
+  font-family: var(--mono);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.card-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── STATUS PILL ── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.pill-green {
+  background: rgba(34,197,94,.08);
+  border-color: rgba(34,197,94,.3);
+  color: #4ade80;
+}
+.pill-amber {
+  background: rgba(245,158,11,.08);
+  border-color: rgba(245,158,11,.3);
+  color: #fbbf24;
+}
+.pill-red {
+  background: rgba(239,68,68,.08);
+  border-color: rgba(239,68,68,.3);
+  color: #f87171;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 48px 0;
+}
+
+/* ── MONTH COVERAGE ── */
+.coverage-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.months-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.month-chip {
+  padding: 5px 13px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--mono);
+  border: 1px solid;
+  transition: background .15s;
+}
+.chip-filled {
+  background: rgba(245,158,11,.12);
+  border-color: rgba(245,158,11,.35);
+  color: #fbbf24;
+}
+.chip-latest {
+  background: rgba(245,158,11,.25);
+  border-color: #f59e0b;
+  color: #fff;
+}
+
+.coverage-note {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 6px;
+}
+
+/* ── DATA BREAKDOWN ── */
+.breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media(max-width:600px) { .breakdown { grid-template-columns: 1fr; } }
+
+.breakdown-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.breakdown-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.breakdown-val {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 12px;
+  color: var(--dim);
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+.footer strong { color: var(--muted); }
+
+/* ── SOURCE BARS ── */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.source-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.source-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.source-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.source-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.source-count {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--teal);
+}
+
+.source-date {
+  font-size: 11px;
+  color: var(--dim);
+  font-family: var(--mono);
+}
+
+.source-bar-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.source-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #2dd4bf, #0e9f8c);
+  transition: width .4s ease;
+}
+
+/* ── LOADING SKELETON ── */
+.loading {
+  color: var(--dim);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+.skeleton-bar {
+  display: inline-block;
+  background: var(--border);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Bev<span>Genie</span></div>
+  <div class="header-right">
+    <div class="header-title">Data Status Dashboard</div>
+    <div class="snapshot-time" id="snapshot-time">Loading live data...</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ═══════════ TTB ═══════════ -->
+  <section class="section">
+
+    <div class="section-eyebrow">
+      <div class="section-dot" style="background:var(--blue);"></div>
+      <span class="section-tag" style="color:var(--blue);">TTB · Federal Label Approvals</span>
+    </div>
+    <h2 class="section-heading">Beverage Label Approvals</h2>
+    <p class="section-sub">Federal label approvals collected from the TTB COLA online registry</p>
+
+    <div class="hero-row">
+      <div class="hero-block">
+        <div class="hero-label">Labels Approved &amp; Loaded</div>
+        <div class="hero-num" style="color:var(--blue);" id="ttb-total-labels"><span class="loading">--</span></div>
+        <div class="hero-context" id="ttb-hero-context">
+          <span class="live-dot"></span>
+          <span class="loading">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-accent" style="background:var(--blue);"></div>
+        <span class="card-icon">🏢</span>
+        <div class="card-value" style="color:var(--blue);" id="ttb-companies"><span class="loading">--</span></div>
+        <div class="card-label">Companies on record</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--purple);"></div>
+        <span class="card-icon">🍾</span>
+        <div class="card-value" style="color:var(--purple);" id="ttb-products"><span class="loading">--</span></div>
+        <div class="card-label">Unique products catalogued</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--teal);"></div>
+        <span class="card-icon">🗂️</span>
+        <div class="card-value" style="color:var(--teal);" id="ttb-categories"><span class="loading">--</span></div>
+        <div class="card-label">Beverage categories</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--muted);"></div>
+        <span class="card-icon">🌍</span>
+        <div class="card-value" style="color:var(--text);" id="ttb-origins"><span class="loading">--</span></div>
+        <div class="card-label">Countries &amp; states of origin</div>
+      </div>
+    </div>
+
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════ NABCA ═══════════ -->
+  <section class="section">
+
+    <div class="section-eyebrow">
+      <div class="section-dot" style="background:var(--amber);"></div>
+      <span class="section-tag" style="color:var(--amber);">NABCA · Beverage Alcohol Market Data</span>
+    </div>
+    <h2 class="section-heading">Market Intelligence Records</h2>
+    <p class="section-sub">Sales and distribution data from NABCA control state reports</p>
+
+    <div class="hero-row">
+      <div class="hero-block">
+        <div class="hero-label">Total Market Data Records</div>
+        <div class="hero-num" style="color:var(--amber);" id="nabca-total"><span class="loading">--</span></div>
+        <div class="hero-context" id="nabca-hero-context">
+          <span class="live-dot" style="background:var(--amber);"></span>
+          <span class="loading">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown" id="nabca-breakdown">
+      <div class="breakdown-row">
+        <span class="breakdown-label">🏭 &nbsp;Vendor-level sales records</span>
+        <span class="breakdown-val" style="color:var(--amber);" id="nabca-vendor"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">🍷 &nbsp;Brand-level sales records</span>
+        <span class="breakdown-val" style="color:var(--amber);" id="nabca-brand"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">🥇 &nbsp;Brand leader rankings</span>
+        <span class="breakdown-val" id="nabca-leaders"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">📊 &nbsp;Top vendor rankings</span>
+        <span class="breakdown-val" id="nabca-top-vendors"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">📂 &nbsp;Category-level vendor breakdowns</span>
+        <span class="breakdown-val" id="nabca-cat-vendors"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">📅 &nbsp;Current, rolling &amp; YTD summaries</span>
+        <span class="breakdown-val" id="nabca-summaries"><span class="loading">--</span></span>
+      </div>
+    </div>
+
+    <!-- Month coverage -->
+    <div style="margin-top:28px;">
+      <div class="coverage-heading" id="nabca-coverage-heading">
+        📆 &nbsp;Monthly Coverage &nbsp;—&nbsp; <span class="loading">loading...</span>
+      </div>
+      <div class="months-grid" id="nabca-months-grid">
+        <span class="month-chip chip-filled loading" style="width:80px;">&nbsp;</span>
+        <span class="month-chip chip-filled loading" style="width:80px;">&nbsp;</span>
+        <span class="month-chip chip-filled loading" style="width:80px;">&nbsp;</span>
+      </div>
+      <p class="coverage-note" id="nabca-coverage-note"><span class="loading">Loading...</span></p>
+    </div>
+
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════ Publications ═══════════ -->
+  <section class="section">
+    <div class="section-eyebrow">
+      <div class="section-dot" style="background:var(--teal);"></div>
+      <span class="section-tag" style="color:var(--teal);">Publications · Trade Press &amp; Articles</span>
+    </div>
+    <h2 class="section-heading">Trade Publication Articles</h2>
+    <p class="section-sub">Industry news and market intelligence collected from leading beverage alcohol trade publications</p>
+
+    <div class="hero-row">
+      <div class="hero-block">
+        <div class="hero-label">Total Articles Ingested</div>
+        <div class="hero-num" style="color:var(--teal);" id="pub-total"><span class="loading">--</span></div>
+        <div class="hero-context" id="pub-hero-context">
+          <span class="live-dot" style="background:var(--teal);"></span>
+          <span class="loading">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards" style="grid-template-columns:repeat(3,1fr);">
+      <div class="card">
+        <div class="card-accent" style="background:var(--teal);"></div>
+        <span class="card-icon">🏷️</span>
+        <div class="card-value" style="color:var(--teal);" id="pub-keywords"><span class="loading">--</span></div>
+        <div class="card-label">Topic keywords tagged</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--purple);"></div>
+        <span class="card-icon">🗞️</span>
+        <div class="card-value" style="color:var(--purple);" id="pub-sources"><span class="loading">--</span></div>
+        <div class="card-label">Active publication sources</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--green);"></div>
+        <span class="card-icon">📰</span>
+        <div class="card-value" style="color:var(--green);" id="pub-clean"><span class="loading">--</span></div>
+        <div class="card-label">Articles fully processed</div>
+      </div>
+    </div>
+
+    <!-- Source breakdown -->
+    <div style="margin-top:8px;">
+      <div class="coverage-heading">
+        📡 &nbsp;Articles by Source
+      </div>
+      <div class="source-list" id="pub-source-list">
+        <div class="source-row"><div class="source-top"><span class="source-name loading">Loading sources...</span></div></div>
+      </div>
+    </div>
+
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════ Market Intel ═══════════ -->
+  <section class="section">
+
+    <div class="section-eyebrow">
+      <div class="section-dot" style="background:var(--green);"></div>
+      <span class="section-tag" style="color:var(--green);">Market Intel · Accounts &amp; Demographics</span>
+    </div>
+    <h2 class="section-heading">Market Intelligence</h2>
+    <p class="section-sub">Liquor license accounts, census demographics, and geographic crosswalks powering territory analytics</p>
+
+    <div class="hero-row">
+      <div class="hero-block">
+        <div class="hero-label">Total Records</div>
+        <div class="hero-num" style="color:var(--green);" id="mi-total"><span class="loading">--</span></div>
+        <div class="hero-context" id="mi-hero-context">
+          <span class="live-dot" style="background:var(--green);"></span>
+          <span class="loading">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards" style="grid-template-columns:repeat(3,1fr);">
+      <div class="card">
+        <div class="card-accent" style="background:var(--green);"></div>
+        <span class="card-icon">🪪</span>
+        <div class="card-value" style="color:var(--green);" id="mi-licenses"><span class="loading">--</span></div>
+        <div class="card-label">Active licenses</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--purple);"></div>
+        <span class="card-icon">🏢</span>
+        <div class="card-value" style="color:var(--purple);" id="mi-businesses"><span class="loading">--</span></div>
+        <div class="card-label">Unique businesses</div>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--blue);"></div>
+        <span class="card-icon">📍</span>
+        <div class="card-value" style="color:var(--blue);" id="mi-license-types"><span class="loading">--</span></div>
+        <div class="card-label">License types</div>
+      </div>
+    </div>
+
+    <!-- State coverage -->
+    <div style="margin-top:8px;">
+      <div class="coverage-heading">
+        🗺️ &nbsp;Licenses by State
+      </div>
+      <div class="source-list" id="mi-state-list">
+        <div class="source-row"><div class="source-top"><span class="source-name loading">Loading states...</span></div></div>
+      </div>
+    </div>
+
+    <!-- Tier breakdown -->
+    <div class="breakdown" style="margin-top:24px;" id="mi-tier-breakdown">
+      <div class="breakdown-row">
+        <span class="breakdown-label">🛒 &nbsp;Retail licenses</span>
+        <span class="breakdown-val" style="color:var(--green);" id="mi-tier-retail"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">🏭 &nbsp;Manufacturing licenses</span>
+        <span class="breakdown-val" style="color:var(--green);" id="mi-tier-manufacturing"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">🚚 &nbsp;Distribution licenses</span>
+        <span class="breakdown-val" id="mi-tier-distribution"><span class="loading">--</span></span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label">📋 &nbsp;Other licenses</span>
+        <span class="breakdown-val" id="mi-tier-other"><span class="loading">--</span></span>
+      </div>
+    </div>
+
+    <!-- Reference data -->
+    <div style="margin-top:24px;">
+      <div class="coverage-heading">
+        📊 &nbsp;Reference &amp; Census Data
+      </div>
+      <div class="breakdown">
+        <div class="breakdown-row">
+          <span class="breakdown-label">👤 &nbsp;Census demographics (ZIP-level)</span>
+          <span class="breakdown-val" id="mi-census-demo"><span class="loading">--</span></span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">💰 &nbsp;Census economics (ZIP-level)</span>
+          <span class="breakdown-val" id="mi-census-econ"><span class="loading">--</span></span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">🎓 &nbsp;Census education (ZIP-level)</span>
+          <span class="breakdown-val" id="mi-census-edu"><span class="loading">--</span></span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">🗂️ &nbsp;License type definitions</span>
+          <span class="breakdown-val" id="mi-license-defs"><span class="loading">--</span></span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">📮 &nbsp;ZIP → County crosswalk</span>
+          <span class="breakdown-val" id="mi-zip-county"><span class="loading">--</span></span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">📺 &nbsp;ZIP → DMA crosswalk</span>
+          <span class="breakdown-val" id="mi-zip-dma"><span class="loading">--</span></span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="footer" id="footer">
+  <strong>BevGenie Platform</strong> &nbsp;·&nbsp; Twenty20 Systems &nbsp;·&nbsp;
+  <span id="footer-timestamp">Loading...</span> &nbsp;·&nbsp;
+  Data sources: supabase-amber-tree (TTB · NABCA) &nbsp;·&nbsp; supabase-red-grass (Publications · Market Intel)
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ── Supabase clients ──
+  const amberTree = supabase.createClient(
+    'https://xhvsvhiysnacdinclncn.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhodnN2aGl5c25hY2RpbmNsbmNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTc1MjgsImV4cCI6MjA3MzQ5MzUyOH0.c2jd6mZfQP2X4XSjxmdeqteZ16JRV3-6W-Uyq7oYqng'
+  );
+
+  const redGrass = supabase.createClient(
+    'https://tnricrwvrnsnfbvrvoor.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRucmljcnd2cm5zbmZidnJ2b29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM5NDMsImV4cCI6MjA3NTM0OTk0M30.528psFnrSG-CNMjOUHTTNMOXKoUk41KqsL4Jnlav5a8'
+  );
+
+  // ── Helpers ──
+  const fmt = (n) => Number(n).toLocaleString('en-US');
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr + 'T00:00:00');
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+
+  function formatDateShort(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr + 'T00:00:00');
+    return MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ' ' + d.getFullYear();
+  }
+
+  function periodToLabel(year, month) {
+    return MONTH_NAMES[month - 1] + ' ' + year;
+  }
+
+  const STATE_NAMES = {TX:'Texas',FL:'Florida',PA:'Pennsylvania',AZ:'Arizona',NJ:'New Jersey',CA:'California',NY:'New York',IL:'Illinois',OH:'Ohio',GA:'Georgia',NC:'North Carolina',MI:'Michigan',VA:'Virginia',WA:'Washington',MA:'Massachusetts',CO:'Colorado',MN:'Minnesota',IN:'Indiana',TN:'Tennessee',MO:'Missouri',WI:'Wisconsin',MD:'Maryland',SC:'South Carolina',AL:'Alabama',LA:'Louisiana',KY:'Kentucky',OR:'Oregon',OK:'Oklahoma',CT:'Connecticut',UT:'Utah',IA:'Iowa',NV:'Nevada',AR:'Arkansas',MS:'Mississippi',KS:'Kansas',NM:'New Mexico',NE:'Nebraska',ID:'Idaho',WV:'West Virginia',HI:'Hawaii',NH:'New Hampshire',ME:'Maine',MT:'Montana',RI:'Rhode Island',DE:'Delaware',SD:'South Dakota',ND:'North Dakota',AK:'Alaska',VT:'Vermont',WY:'Wyoming',DC:'District of Columbia'};
+
+  function el(id) { return document.getElementById(id); }
+
+  function showError(sectionIds, msg) {
+    sectionIds.forEach(function(id) {
+      var e = el(id);
+      if (e) e.innerHTML = '<span class="loading" style="animation:none;color:#f87171;">' + msg + '</span>';
+    });
+  }
+
+  // ── Populate TTB section ──
+  function populateTTB(ttb) {
+    el('ttb-total-labels').textContent = fmt(ttb.total_labels);
+    el('ttb-companies').textContent = fmt(ttb.dim_companies_count);
+    el('ttb-products').textContent = fmt(ttb.dim_products_count);
+    el('ttb-categories').textContent = fmt(ttb.distinct_categories);
+    el('ttb-origins').textContent = fmt(ttb.distinct_origins);
+
+    var earliest = formatDate(ttb.earliest_partition);
+    var latest = formatDate(ttb.latest_partition);
+    el('ttb-hero-context').innerHTML =
+      '<span class="live-dot"></span>' +
+      earliest + ' – ' + latest + ' &nbsp;·&nbsp; ' + ttb.days_loaded + ' days of data';
+
+  }
+
+  // ── Populate NABCA section ──
+  function populateNABCA(nabca) {
+    el('nabca-total').textContent = fmt(nabca.total_records);
+    el('nabca-hero-context').innerHTML =
+      '<span class="live-dot" style="background:var(--amber);"></span>' +
+      'Across ' + nabca.distinct_periods + ' monthly reporting periods';
+
+    el('nabca-vendor').textContent = fmt(nabca.raw_vendor_summary);
+    el('nabca-brand').textContent = fmt(nabca.raw_brand_summary);
+    el('nabca-leaders').textContent = fmt(nabca.raw_brand_leaders);
+    el('nabca-top-vendors').textContent = fmt(nabca.raw_top100_vendors);
+    el('nabca-cat-vendors').textContent = fmt(nabca.raw_top20_vendors_by_class);
+
+    var summaries = nabca.raw_current_month + nabca.raw_rolling_12m + nabca.raw_ytd;
+    el('nabca-summaries').textContent = fmt(summaries);
+
+    // Month chips
+    var periods = nabca.period_list || [];
+    el('nabca-coverage-heading').innerHTML =
+      '📆 &nbsp;Monthly Coverage &nbsp;—&nbsp; ' + periods.length + ' periods loaded';
+
+    var chipsHtml = '';
+    periods.forEach(function(p, i) {
+      var label = periodToLabel(p.year, p.month);
+      var isLast = (i === periods.length - 1);
+      if (isLast) {
+        chipsHtml += '<span class="month-chip chip-latest">' + label + ' ✓ latest</span>';
+      } else {
+        chipsHtml += '<span class="month-chip chip-filled">' + label + '</span>';
+      }
+    });
+    el('nabca-months-grid').innerHTML = chipsHtml;
+
+    if (periods.length > 0) {
+      var first = periods[0];
+      var last = periods[periods.length - 1];
+      el('nabca-coverage-note').textContent =
+        periodToLabel(first.year, first.month) + ' → ' + periodToLabel(last.year, last.month) +
+        '  ·  ' + periods.length + ' consecutive months';
+
+    }
+  }
+
+  // ── Populate Publications section ──
+  function populatePublications(pub) {
+    el('pub-total').textContent = fmt(pub.total_articles);
+    el('pub-keywords').textContent = fmt(pub.keyword_article_map_count);
+    el('pub-sources').textContent = fmt(pub.distinct_sources);
+    el('pub-clean').textContent = fmt(pub.articles_clean_count);
+
+    el('pub-hero-context').innerHTML =
+      '<span class="live-dot" style="background:var(--teal);"></span>' +
+      pub.distinct_sources + ' publication sources &nbsp;·&nbsp; Latest: ' + formatDate(pub.latest_publication_date);
+
+    // Source bars
+    var sources = pub.source_breakdown || [];
+    var maxCount = sources.length > 0 ? sources[0].count : 1;
+    var html = '';
+    sources.forEach(function(s) {
+      var pct = ((s.count / pub.total_articles) * 100).toFixed(1);
+      html +=
+        '<div class="source-row">' +
+          '<div class="source-top">' +
+            '<span class="source-name">' + escHtml(s.source_desc) + '</span>' +
+            '<div class="source-meta">' +
+              '<span class="source-count">' + fmt(s.count) + '</span>' +
+              '<span class="source-date">latest ' + formatDateShort(s.latest_date) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="source-bar-track">' +
+            '<div class="source-bar-fill" style="width:' + pct + '%;"></div>' +
+          '</div>' +
+        '</div>';
+    });
+    el('pub-source-list').innerHTML = html;
+
+  }
+
+  // ── Populate Market Intel section ──
+  function populateMarketIntel(mi) {
+    el('mi-total').textContent = fmt(mi.total_market_intel_records);
+    el('mi-licenses').textContent = fmt(mi.standardized_licenses_count);
+    el('mi-businesses').textContent = fmt(mi.unique_businesses);
+    el('mi-license-types').textContent = fmt(mi.license_types_count);
+
+    el('mi-hero-context').innerHTML =
+      '<span class="live-dot" style="background:var(--green);"></span>' +
+      mi.states_count + ' states &nbsp;·&nbsp; ' + fmt(mi.unique_businesses) + ' unique businesses &nbsp;·&nbsp; Latest extraction: ' + formatDate(mi.latest_extraction_date);
+
+    // State bars
+    var states = mi.state_breakdown || [];
+    var totalLicenses = mi.standardized_licenses_count || 1;
+    var stateHtml = '';
+    states.forEach(function(s) {
+      var pct = ((s.count / totalLicenses) * 100).toFixed(1);
+      var name = STATE_NAMES[s.state] || s.state;
+      stateHtml +=
+        '<div class="source-row">' +
+          '<div class="source-top">' +
+            '<span class="source-name">' + escHtml(name) + '</span>' +
+            '<div class="source-meta">' +
+              '<span class="source-count" style="color:var(--green);">' + fmt(s.count) + '</span>' +
+              '<span class="source-date">' + pct + '%</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="source-bar-track">' +
+            '<div class="source-bar-fill" style="width:' + pct + '%; background:linear-gradient(90deg,#22c55e,#16a34a);"></div>' +
+          '</div>' +
+        '</div>';
+    });
+    el('mi-state-list').innerHTML = stateHtml;
+
+    // Tier breakdown
+    var tierMap = {};
+    (mi.tier_breakdown || []).forEach(function(t) {
+      tierMap[t.tier] = t.count;
+    });
+    el('mi-tier-retail').textContent = fmt(tierMap['Retail'] || 0);
+    el('mi-tier-manufacturing').textContent = fmt(tierMap['Manufacturing'] || 0);
+    el('mi-tier-distribution').textContent = fmt(tierMap['Distribution'] || 0);
+    el('mi-tier-other').textContent = fmt(tierMap['Other'] || 0);
+
+    // Census & reference
+    el('mi-census-demo').textContent = fmt(mi.census_demographics_count);
+    el('mi-census-econ').textContent = fmt(mi.census_economics_count);
+    el('mi-census-edu').textContent = fmt(mi.census_education_count);
+    el('mi-license-defs').textContent = fmt(mi.license_types_ref_count);
+    el('mi-zip-county').textContent = fmt(mi.zip_county_crosswalk_count);
+    el('mi-zip-dma').textContent = fmt(mi.zip_dma_crosswalk_count);
+
+  }
+
+  function escHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // ── Fetch & render ──
+  document.addEventListener('DOMContentLoaded', async function() {
+    var loadStart = Date.now();
+
+    try {
+      var [amberResult, redResult] = await Promise.allSettled([
+        amberTree.rpc('get_bevgenie_dashboard_amber'),
+        redGrass.rpc('get_bevgenie_dashboard_red')
+      ]);
+
+      // TTB + NABCA (amber-tree)
+      if (amberResult.status === 'fulfilled' && !amberResult.value.error) {
+        var amber = amberResult.value.data;
+        populateTTB(amber.ttb);
+        populateNABCA(amber.nabca);
+      } else {
+        var errMsg = 'Failed to load';
+        if (amberResult.status === 'fulfilled' && amberResult.value.error) {
+          errMsg = amberResult.value.error.message || errMsg;
+        }
+        showError([
+          'ttb-total-labels','ttb-companies','ttb-products','ttb-categories','ttb-origins',
+          'nabca-total','nabca-vendor','nabca-brand','nabca-leaders','nabca-top-vendors','nabca-cat-vendors','nabca-summaries'
+        ], errMsg);
+        el('ttb-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to amber-tree</span>';
+        el('nabca-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to amber-tree</span>';
+      }
+
+      // Publications + Market Intel (red-grass)
+      if (redResult.status === 'fulfilled' && !redResult.value.error) {
+        var red = redResult.value.data;
+        populatePublications(red.publications);
+        populateMarketIntel(red.market_intel);
+      } else {
+        var errMsg2 = 'Failed to load';
+        if (redResult.status === 'fulfilled' && redResult.value.error) {
+          errMsg2 = redResult.value.error.message || errMsg2;
+        }
+        showError([
+          'pub-total','pub-keywords','pub-sources','pub-clean',
+          'mi-total','mi-licenses','mi-businesses','mi-license-types',
+          'mi-tier-retail','mi-tier-manufacturing','mi-tier-distribution','mi-tier-other',
+          'mi-census-demo','mi-census-econ','mi-census-edu','mi-license-defs','mi-zip-county','mi-zip-dma'
+        ], errMsg2);
+        el('pub-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to red-grass</span>';
+        el('mi-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to red-grass</span>';
+      }
+
+      // Update timestamp
+      var now = new Date();
+      var elapsed = ((Date.now() - loadStart) / 1000).toFixed(1);
+      var ts = now.toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'}) +
+               ' at ' + now.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+      el('snapshot-time').textContent = 'Live · Refreshed ' + ts + ' (' + elapsed + 's)';
+      el('footer-timestamp').textContent = 'Live data as of ' + ts;
+
+    } catch (err) {
+      el('snapshot-time').textContent = 'Error loading data: ' + err.message;
+      el('snapshot-time').style.color = '#f87171';
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
