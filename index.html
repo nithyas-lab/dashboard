@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BevGenie · Data Status</title>
+<title>BevGenie · Data Tracker</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -21,6 +21,7 @@
   --green:  #22c55e;
   --purple: #a78bfa;
   --teal:   #2dd4bf;
+  --red:    #ef4444;
 
   --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
 }
@@ -33,289 +34,613 @@ body {
   padding-bottom: 80px;
 }
 
-/* ── HEADER ── */
-.header {
+/* ── SHARED TAB NAV ── */
+.nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 48px;
-  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 52px;
   background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
-.logo {
-  font-size: 22px;
+.nav-logo {
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -.5px;
+  text-decoration: none;
+  color: var(--text);
 }
-.logo span { color: var(--blue); }
+.nav-logo span { color: var(--blue); }
 
-.header-right { text-align: right; }
-.header-title {
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+  align-items: stretch;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
 }
-.snapshot-time {
-  font-size: 12px;
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.nav-time {
+  font-size: 11px;
   color: var(--dim);
-  margin-top: 2px;
   font-family: var(--mono);
+}
+
+@media(max-width:600px) {
+  .nav { padding: 0 16px; }
+  .nav-tab { padding: 0 12px; font-size: 12px; }
+  .nav-time { display: none; }
 }
 
 /* ── MAIN ── */
 .main {
-  max-width: 1100px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 48px 32px;
+  padding: 40px 32px;
 }
 
-/* ── SECTION ── */
-.section { margin-bottom: 56px; }
+@media(max-width:600px) { .main { padding: 24px 16px; } }
 
-.section-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 24px; }
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -.5px;
   margin-bottom: 6px;
 }
 
-.section-dot {
-  width: 8px; height: 8px;
+.page-header p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ── KANBAN BOARD ── */
+.kanban { margin-bottom: 56px; }
+
+.kanban-header {
+  display: grid;
+  grid-template-columns: 180px repeat(4, 1fr) 140px 65px 65px;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+}
+
+.kanban-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--dim);
+  text-align: center;
+}
+.kanban-col-label:first-child { text-align: left; }
+
+.kanban-row {
+  display: grid;
+  grid-template-columns: 180px repeat(4, 1fr) 140px 65px 65px;
+  gap: 4px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .15s;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+}
+.kanban-row:hover { background: rgba(255,255,255,.02); }
+.kanban-row.expanded {
+  background: rgba(255,255,255,.03);
+  border-color: var(--border);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.kanban-row.keyboard-focus {
+  background: rgba(59, 130, 246, .06);
+  border-color: rgba(59, 130, 246, .25);
+  outline: none;
+}
+
+.kanban-workstream {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  flex-wrap: wrap;
+}
+
+.ws-dot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.section-tag {
+.ws-name-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ws-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priority-badge {
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  flex-shrink: 0;
+}
+.priority-badge.p1 { background: rgba(239,68,68,.15); color: #f87171; }
+.priority-badge.p2 { background: rgba(245,158,11,.15); color: #fbbf24; }
+.priority-badge.p3 { background: rgba(74,90,112,.2); color: var(--muted); }
+
+.progress-fraction {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--dim);
+  background: rgba(255,255,255,.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.ws-meta {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--dim);
+  font-family: var(--mono);
+}
+
+/* ── ENVIRONMENT PILL ── */
+.env-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.env-pill.env-prod { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
+.env-pill.env-pre-prod { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); color: #fbbf24; }
+.env-pill.env-dev { background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.3); color: #a78bfa; }
+.env-pill.env-na { color: var(--dim); font-size: 10px; border: 1px dashed var(--border); }
+
+.kanban-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 16px;
+  border-radius: 999px;
   font-size: 11px;
+  font-weight: 600;
+  min-width: 36px;
+  transition: transform .15s;
+}
+
+.stage-pill.completed {
+  background: rgba(34, 197, 94, .1);
+  border: 1px solid rgba(34, 197, 94, .3);
+  color: #4ade80;
+}
+
+.stage-pill.current {
+  border: 2px solid;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.15); }
+  50% { box-shadow: 0 0 0 4px rgba(255,255,255,.05); }
+}
+
+.stage-pill.future {
+  border: 1px dashed var(--border);
+  color: var(--dim);
+  opacity: .4;
+}
+
+.stage-pill.not-started {
+  border: 1px dashed var(--border);
+  color: var(--dim);
+  opacity: .25;
+}
+
+/* ── ROADMAP COLUMN LINK ── */
+.roadmap-col-link {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--blue);
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.4;
+  padding: 2px 4px;
+}
+.roadmap-col-link:hover {
+  text-decoration: underline;
+}
+
+/* ── SECTION DIVIDER ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px 8px;
+}
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.section-divider-label {
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .12em;
+  color: var(--dim);
+  white-space: nowrap;
 }
 
-.section-heading {
-  font-size: 26px;
+/* ── DETAIL PANEL (animated expand/collapse) ── */
+.detail-panel {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 24px;
+  background: var(--card);
+  border: 1px solid transparent;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  margin-bottom: 0;
+  transition: max-height 0.4s ease-out, opacity 0.3s, padding 0.3s, border-color 0.2s, margin-bottom 0.3s;
+}
+.detail-panel.open {
+  max-height: 2000px;
+  opacity: 1;
+  padding: 24px;
+  border-color: var(--border);
+  margin-bottom: 8px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.detail-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  transition: transform .15s, border-color .15s;
+}
+.detail-card:hover {
+  transform: translateY(-2px);
+  border-color: #2a3f5f;
+}
+
+.detail-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  font-size: 13px;
+}
+.detail-item:last-child { border-bottom: none; }
+
+.detail-item-label { color: var(--muted); }
+.detail-item-value {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  background: rgba(59, 130, 246, .08);
+  border: 1px solid rgba(59, 130, 246, .2);
+  text-decoration: none;
+  transition: background .15s;
+}
+.detail-link:hover { background: rgba(59, 130, 246, .15); }
+
+.table-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.table-chip {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.issue-list, .next-list {
+  list-style: none;
+  padding: 0;
+}
+.issue-list li, .next-list li {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+.issue-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  opacity: .6;
+}
+.next-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  opacity: .6;
+}
+
+.sub-heading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--dim);
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+.sub-heading:first-child { margin-top: 0; }
+
+/* ── STAT MINI CARDS ── */
+.stat-mini-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+.stat-mini-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+.stat-mini-value {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--mono);
+  line-height: 1.2;
+}
+.stat-mini-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-top: 4px;
+}
+
+/* ── STAT BREAKDOWN ROWS ── */
+.stat-breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+}
+.stat-breakdown-label {
+  min-width: 100px;
+  color: var(--muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.stat-bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .5s ease;
+}
+.stat-breakdown-value {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 11px;
+  min-width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── NABCA PERIOD CHIPS ── */
+.stat-months-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.stat-month-chip {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--mono);
+  background: rgba(245,158,11,.1);
+  border: 1px solid rgba(245,158,11,.2);
+  color: #fbbf24;
+}
+
+/* ── STALE BADGE ── */
+.stale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(245,158,11,.12);
+  border: 1px solid rgba(245,158,11,.3);
+  color: #fbbf24;
+  margin-left: 6px;
+}
+
+/* ── ERROR STATE ── */
+.error-state {
+  color: #f87171;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ── ROADMAP ── */
+.roadmap { margin-bottom: 40px; }
+
+.roadmap h2 {
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: -.5px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.section-sub {
+.roadmap-sub {
   font-size: 14px;
   color: var(--muted);
   margin-bottom: 28px;
 }
 
-/* ── BIG HERO NUMBER ── */
-.hero-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 20px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
+.roadmap-group { margin-bottom: 28px; }
 
-.hero-block {}
-
-.hero-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.hero-num {
-  font-size: 72px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -3px;
-  font-family: var(--mono);
-}
-
-.hero-context {
-  font-size: 14px;
-  color: var(--muted);
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.live-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-  animation: blink 2.5s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
-
-/* ── STAT CARDS ── */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-@media(max-width:780px) { .cards { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:480px) { .cards { grid-template-columns: 1fr; } }
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px 20px;
-  position: relative;
-  overflow: hidden;
-  transition: transform .15s, border-color .15s;
-}
-.card:hover {
-  transform: translateY(-2px);
-  border-color: #2a3f5f;
-}
-
-.card-accent {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: 2px 2px 0 0;
-}
-
-.card-icon {
-  font-size: 22px;
-  margin-bottom: 10px;
-  display: block;
-}
-
-.card-value {
-  font-size: 30px;
-  font-weight: 800;
-  font-family: var(--mono);
-  letter-spacing: -1px;
-  line-height: 1;
-  margin-bottom: 6px;
-}
-
-.card-label {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-/* ── STATUS PILL ── */
-.status-pill {
+.roadmap-group-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid;
-}
-.pill-green {
-  background: rgba(34,197,94,.08);
-  border-color: rgba(34,197,94,.3);
-  color: #4ade80;
-}
-.pill-amber {
-  background: rgba(245,158,11,.08);
-  border-color: rgba(245,158,11,.3);
-  color: #fbbf24;
-}
-.pill-red {
-  background: rgba(239,68,68,.08);
-  border-color: rgba(239,68,68,.3);
-  color: #f87171;
-}
-
-/* ── DIVIDER ── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 48px 0;
-}
-
-/* ── MONTH COVERAGE ── */
-.coverage-heading {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: 14px;
+  letter-spacing: .1em;
+  margin-bottom: 12px;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.roadmap-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roadmap-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.months-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.month-chip {
-  padding: 5px 13px;
-  border-radius: 7px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--mono);
-  border: 1px solid;
-  transition: background .15s;
-}
-.chip-filled {
-  background: rgba(245,158,11,.12);
-  border-color: rgba(245,158,11,.35);
-  color: #fbbf24;
-}
-.chip-latest {
-  background: rgba(245,158,11,.25);
-  border-color: #f59e0b;
-  color: #fff;
-}
-
-.coverage-note {
-  font-size: 12px;
-  color: var(--dim);
-  margin-top: 6px;
-}
-
-/* ── DATA BREAKDOWN ── */
-.breakdown {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 24px;
-}
-
-@media(max-width:600px) { .breakdown { grid-template-columns: 1fr; } }
-
-.breakdown-row {
+  padding: 14px 18px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.breakdown-label {
   font-size: 13px;
-  color: var(--muted);
 }
 
-.breakdown-val {
-  font-family: var(--mono);
-  font-size: 15px;
+.roadmap-ws-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  flex-shrink: 0;
+}
+
+.roadmap-item-text {
+  color: var(--muted);
+  flex: 1;
+}
+
+.roadmap-item.dim {
+  opacity: .5;
 }
 
 /* ── FOOTER ── */
@@ -329,379 +654,114 @@ body {
 }
 .footer strong { color: var(--muted); }
 
-/* ── SOURCE BARS ── */
-.source-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.source-row {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 18px;
-}
-
-.source-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.source-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.source-meta {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.source-count {
-  font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--teal);
-}
-
-.source-date {
-  font-size: 11px;
-  color: var(--dim);
-  font-family: var(--mono);
-}
-
-.source-bar-track {
-  height: 5px;
-  background: var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.source-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #2dd4bf, #0e9f8c);
-  transition: width .4s ease;
-}
-
-/* ── LOADING SKELETON ── */
+/* ── LOADING ── */
 .loading {
   color: var(--dim);
   animation: pulse 1.5s ease-in-out infinite;
 }
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
-.skeleton-bar {
-  display: inline-block;
-  background: var(--border);
-  border-radius: 4px;
-  animation: pulse 1.5s ease-in-out infinite;
+/* ── RESPONSIVE KANBAN ── */
+@media(max-width:900px) {
+  .kanban-header { display: none; }
+
+  .kanban-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .kanban-row.expanded {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+  }
+
+  .kanban-workstream {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .kanban-stage { justify-content: flex-start; }
+
+  .stage-pill::before {
+    content: attr(data-label);
+    font-size: 10px;
+    color: var(--dim);
+    margin-right: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  .kanban-stages-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .kanban-env-group {
+    display: flex;
+    gap: 6px;
+  }
+
+  .roadmap-col-link {
+    text-align: left;
+    font-size: 12px;
+  }
 }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="logo">Bev<span>Genie</span></div>
-  <div class="header-right">
-    <div class="header-title">Data Status Dashboard</div>
-    <div class="snapshot-time" id="snapshot-time">Loading live data...</div>
+<nav class="nav">
+  <a href="bevgenie_tracker.html" class="nav-logo">Bev<span>Genie</span></a>
+  <div class="nav-tabs">
+    <a href="bevgenie_status.html" class="nav-tab">Status Dashboard</a>
+    <a href="bevgenie_tracker.html" class="nav-tab active">Data Tracker</a>
   </div>
-</header>
+  <div class="nav-time" id="nav-time">--</div>
+</nav>
 
 <main class="main">
 
-  <!-- ═══════════ TTB ═══════════ -->
-  <section class="section">
+  <div class="page-header">
+    <h1>Data Tracker</h1>
+    <p>What's archived, what's in the database, what's left to do</p>
+  </div>
 
-    <div class="section-eyebrow">
-      <div class="section-dot" style="background:var(--blue);"></div>
-      <span class="section-tag" style="color:var(--blue);">TTB · Federal Label Approvals</span>
+  <!-- ═══════════ KANBAN BOARD ═══════════ -->
+  <section class="kanban">
+    <div class="kanban-header">
+      <div class="kanban-col-label">Workstream</div>
+      <div class="kanban-col-label">Archive</div>
+      <div class="kanban-col-label">Model</div>
+      <div class="kanban-col-label">Ingest</div>
+      <div class="kanban-col-label">Done</div>
+      <div class="kanban-col-label">Roadmap</div>
+      <div class="kanban-col-label">Data</div>
+      <div class="kanban-col-label">Platform</div>
     </div>
-    <h2 class="section-heading">Beverage Label Approvals</h2>
-    <p class="section-sub">Federal label approvals collected from the TTB COLA online registry</p>
-
-    <div class="hero-row">
-      <div class="hero-block">
-        <div class="hero-label">Labels Approved &amp; Loaded</div>
-        <div class="hero-num" style="color:var(--blue);" id="ttb-total-labels"><span class="loading">--</span></div>
-        <div class="hero-context" id="ttb-hero-context">
-          <span class="live-dot"></span>
-          <span class="loading">Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="cards">
-      <div class="card">
-        <div class="card-accent" style="background:var(--blue);"></div>
-        <span class="card-icon">🏢</span>
-        <div class="card-value" style="color:var(--blue);" id="ttb-companies"><span class="loading">--</span></div>
-        <div class="card-label">Companies on record</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--purple);"></div>
-        <span class="card-icon">🍾</span>
-        <div class="card-value" style="color:var(--purple);" id="ttb-products"><span class="loading">--</span></div>
-        <div class="card-label">Unique products catalogued</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--teal);"></div>
-        <span class="card-icon">🗂️</span>
-        <div class="card-value" style="color:var(--teal);" id="ttb-categories"><span class="loading">--</span></div>
-        <div class="card-label">Beverage categories</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--muted);"></div>
-        <span class="card-icon">🌍</span>
-        <div class="card-value" style="color:var(--text);" id="ttb-origins"><span class="loading">--</span></div>
-        <div class="card-label">Countries &amp; states of origin</div>
-      </div>
-    </div>
-
+    <div id="kanban-body"></div>
   </section>
 
-  <hr class="divider">
-
-  <!-- ═══════════ NABCA ═══════════ -->
-  <section class="section">
-
-    <div class="section-eyebrow">
-      <div class="section-dot" style="background:var(--amber);"></div>
-      <span class="section-tag" style="color:var(--amber);">NABCA · Beverage Alcohol Market Data</span>
-    </div>
-    <h2 class="section-heading">Market Intelligence Records</h2>
-    <p class="section-sub">Sales and distribution data from NABCA control state reports</p>
-
-    <div class="hero-row">
-      <div class="hero-block">
-        <div class="hero-label">Total Market Data Records</div>
-        <div class="hero-num" style="color:var(--amber);" id="nabca-total"><span class="loading">--</span></div>
-        <div class="hero-context" id="nabca-hero-context">
-          <span class="live-dot" style="background:var(--amber);"></span>
-          <span class="loading">Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="breakdown" id="nabca-breakdown">
-      <div class="breakdown-row">
-        <span class="breakdown-label">🏭 &nbsp;Vendor-level sales records</span>
-        <span class="breakdown-val" style="color:var(--amber);" id="nabca-vendor"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">🍷 &nbsp;Brand-level sales records</span>
-        <span class="breakdown-val" style="color:var(--amber);" id="nabca-brand"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">🥇 &nbsp;Brand leader rankings</span>
-        <span class="breakdown-val" id="nabca-leaders"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">📊 &nbsp;Top vendor rankings</span>
-        <span class="breakdown-val" id="nabca-top-vendors"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">📂 &nbsp;Category-level vendor breakdowns</span>
-        <span class="breakdown-val" id="nabca-cat-vendors"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">📅 &nbsp;Current, rolling &amp; YTD summaries</span>
-        <span class="breakdown-val" id="nabca-summaries"><span class="loading">--</span></span>
-      </div>
-    </div>
-
-    <!-- Month coverage -->
-    <div style="margin-top:28px;">
-      <div class="coverage-heading" id="nabca-coverage-heading">
-        📆 &nbsp;Monthly Coverage &nbsp;—&nbsp; <span class="loading">loading...</span>
-      </div>
-      <div class="months-grid" id="nabca-months-grid">
-        <span class="month-chip chip-filled loading" style="width:80px;">&nbsp;</span>
-        <span class="month-chip chip-filled loading" style="width:80px;">&nbsp;</span>
-        <span class="month-chip chip-filled loading" style="width:80px;">&nbsp;</span>
-      </div>
-      <p class="coverage-note" id="nabca-coverage-note"><span class="loading">Loading...</span></p>
-    </div>
-
-  </section>
-
-  <hr class="divider">
-
-  <!-- ═══════════ Publications ═══════════ -->
-  <section class="section">
-    <div class="section-eyebrow">
-      <div class="section-dot" style="background:var(--teal);"></div>
-      <span class="section-tag" style="color:var(--teal);">Publications · Trade Press &amp; Articles</span>
-    </div>
-    <h2 class="section-heading">Trade Publication Articles</h2>
-    <p class="section-sub">Industry news and market intelligence collected from leading beverage alcohol trade publications</p>
-
-    <div class="hero-row">
-      <div class="hero-block">
-        <div class="hero-label">Total Articles Ingested</div>
-        <div class="hero-num" style="color:var(--teal);" id="pub-total"><span class="loading">--</span></div>
-        <div class="hero-context" id="pub-hero-context">
-          <span class="live-dot" style="background:var(--teal);"></span>
-          <span class="loading">Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="cards" style="grid-template-columns:repeat(3,1fr);">
-      <div class="card">
-        <div class="card-accent" style="background:var(--teal);"></div>
-        <span class="card-icon">🏷️</span>
-        <div class="card-value" style="color:var(--teal);" id="pub-keywords"><span class="loading">--</span></div>
-        <div class="card-label">Topic keywords tagged</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--purple);"></div>
-        <span class="card-icon">🗞️</span>
-        <div class="card-value" style="color:var(--purple);" id="pub-sources"><span class="loading">--</span></div>
-        <div class="card-label">Active publication sources</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--green);"></div>
-        <span class="card-icon">📰</span>
-        <div class="card-value" style="color:var(--green);" id="pub-clean"><span class="loading">--</span></div>
-        <div class="card-label">Articles fully processed</div>
-      </div>
-    </div>
-
-    <!-- Source breakdown -->
-    <div style="margin-top:8px;">
-      <div class="coverage-heading">
-        📡 &nbsp;Articles by Source
-      </div>
-      <div class="source-list" id="pub-source-list">
-        <div class="source-row"><div class="source-top"><span class="source-name loading">Loading sources...</span></div></div>
-      </div>
-    </div>
-
-  </section>
-
-  <hr class="divider">
-
-  <!-- ═══════════ Market Intel ═══════════ -->
-  <section class="section">
-
-    <div class="section-eyebrow">
-      <div class="section-dot" style="background:var(--green);"></div>
-      <span class="section-tag" style="color:var(--green);">Market Intel · Accounts &amp; Demographics</span>
-    </div>
-    <h2 class="section-heading">Market Intelligence</h2>
-    <p class="section-sub">Liquor license accounts, census demographics, and geographic crosswalks powering territory analytics</p>
-
-    <div class="hero-row">
-      <div class="hero-block">
-        <div class="hero-label">Total Records</div>
-        <div class="hero-num" style="color:var(--green);" id="mi-total"><span class="loading">--</span></div>
-        <div class="hero-context" id="mi-hero-context">
-          <span class="live-dot" style="background:var(--green);"></span>
-          <span class="loading">Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="cards" style="grid-template-columns:repeat(3,1fr);">
-      <div class="card">
-        <div class="card-accent" style="background:var(--green);"></div>
-        <span class="card-icon">🪪</span>
-        <div class="card-value" style="color:var(--green);" id="mi-licenses"><span class="loading">--</span></div>
-        <div class="card-label">Active licenses</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--purple);"></div>
-        <span class="card-icon">🏢</span>
-        <div class="card-value" style="color:var(--purple);" id="mi-businesses"><span class="loading">--</span></div>
-        <div class="card-label">Unique businesses</div>
-      </div>
-      <div class="card">
-        <div class="card-accent" style="background:var(--blue);"></div>
-        <span class="card-icon">📍</span>
-        <div class="card-value" style="color:var(--blue);" id="mi-license-types"><span class="loading">--</span></div>
-        <div class="card-label">License types</div>
-      </div>
-    </div>
-
-    <!-- State coverage -->
-    <div style="margin-top:8px;">
-      <div class="coverage-heading">
-        🗺️ &nbsp;Licenses by State
-      </div>
-      <div class="source-list" id="mi-state-list">
-        <div class="source-row"><div class="source-top"><span class="source-name loading">Loading states...</span></div></div>
-      </div>
-    </div>
-
-    <!-- Tier breakdown -->
-    <div class="breakdown" style="margin-top:24px;" id="mi-tier-breakdown">
-      <div class="breakdown-row">
-        <span class="breakdown-label">🛒 &nbsp;Retail licenses</span>
-        <span class="breakdown-val" style="color:var(--green);" id="mi-tier-retail"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">🏭 &nbsp;Manufacturing licenses</span>
-        <span class="breakdown-val" style="color:var(--green);" id="mi-tier-manufacturing"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">🚚 &nbsp;Distribution licenses</span>
-        <span class="breakdown-val" id="mi-tier-distribution"><span class="loading">--</span></span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label">📋 &nbsp;Other licenses</span>
-        <span class="breakdown-val" id="mi-tier-other"><span class="loading">--</span></span>
-      </div>
-    </div>
-
-    <!-- Reference data -->
-    <div style="margin-top:24px;">
-      <div class="coverage-heading">
-        📊 &nbsp;Reference &amp; Census Data
-      </div>
-      <div class="breakdown">
-        <div class="breakdown-row">
-          <span class="breakdown-label">👤 &nbsp;Census demographics (ZIP-level)</span>
-          <span class="breakdown-val" id="mi-census-demo"><span class="loading">--</span></span>
-        </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label">💰 &nbsp;Census economics (ZIP-level)</span>
-          <span class="breakdown-val" id="mi-census-econ"><span class="loading">--</span></span>
-        </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label">🎓 &nbsp;Census education (ZIP-level)</span>
-          <span class="breakdown-val" id="mi-census-edu"><span class="loading">--</span></span>
-        </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label">🗂️ &nbsp;License type definitions</span>
-          <span class="breakdown-val" id="mi-license-defs"><span class="loading">--</span></span>
-        </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label">📮 &nbsp;ZIP → County crosswalk</span>
-          <span class="breakdown-val" id="mi-zip-county"><span class="loading">--</span></span>
-        </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label">📺 &nbsp;ZIP → DMA crosswalk</span>
-          <span class="breakdown-val" id="mi-zip-dma"><span class="loading">--</span></span>
-        </div>
-      </div>
-    </div>
-
+  <!-- ═══════════ ROADMAP ═══════════ -->
+  <section class="roadmap" id="roadmap-section">
+    <h2>Roadmap</h2>
+    <p class="roadmap-sub">Prioritized next steps across all workstreams</p>
+    <div id="roadmap-body"></div>
   </section>
 
 </main>
 
 <footer class="footer" id="footer">
-  <strong>BevGenie Platform</strong> &nbsp;·&nbsp; Twenty20 Systems &nbsp;·&nbsp;
-  <span id="footer-timestamp">Loading...</span> &nbsp;·&nbsp;
-  Data sources: supabase-amber-tree (TTB · NABCA) &nbsp;·&nbsp; supabase-red-grass (Publications · Market Intel)
+  <strong>BevGenie Platform</strong> &middot; Twenty20 Systems &middot;
+  <span id="footer-timestamp">Loading...</span> &middot;
+  Data sources: supabase-amber-tree (TTB &middot; NABCA &middot; Sera Luce) &middot; supabase-red-grass (Publications &middot; Market Intel)
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -720,195 +780,731 @@ body {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRucmljcnd2cm5zbmZidnJ2b29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM5NDMsImV4cCI6MjA3NTM0OTk0M30.528psFnrSG-CNMjOUHTTNMOXKoUk41KqsL4Jnlav5a8'
   );
 
-  // ── Helpers ──
-  const fmt = (n) => Number(n).toLocaleString('en-US');
+  const fmt = (n) => n == null ? '--' : Number(n).toLocaleString('en-US');
+
+  // ── Stage definitions ──
+  const STAGES = ['archive', 'model', 'ingest', 'done'];
+
+  const STAGE_LABELS = {
+    archive: 'Archive',
+    model: 'Model',
+    ingest: 'Ingest',
+    done: 'Done'
+  };
 
   const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  function formatDate(dateStr) {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr + 'T00:00:00');
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-  }
+  const ENV_LABELS = {
+    'prod': 'Prod',
+    'pre-prod': 'Pre-Prod',
+    'dev': 'Dev',
+    null: 'N/A'
+  };
 
-  function formatDateShort(dateStr) {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr + 'T00:00:00');
-    return MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ' ' + d.getFullYear();
-  }
+  const ENV_CLASSES = {
+    'prod': 'env-prod',
+    'pre-prod': 'env-pre-prod',
+    'dev': 'env-dev',
+    null: 'env-na'
+  };
 
-  function periodToLabel(year, month) {
-    return MONTH_NAMES[month - 1] + ' ' + year;
-  }
-
-  const STATE_NAMES = {TX:'Texas',FL:'Florida',PA:'Pennsylvania',AZ:'Arizona',NJ:'New Jersey',CA:'California',NY:'New York',IL:'Illinois',OH:'Ohio',GA:'Georgia',NC:'North Carolina',MI:'Michigan',VA:'Virginia',WA:'Washington',MA:'Massachusetts',CO:'Colorado',MN:'Minnesota',IN:'Indiana',TN:'Tennessee',MO:'Missouri',WI:'Wisconsin',MD:'Maryland',SC:'South Carolina',AL:'Alabama',LA:'Louisiana',KY:'Kentucky',OR:'Oregon',OK:'Oklahoma',CT:'Connecticut',UT:'Utah',IA:'Iowa',NV:'Nevada',AR:'Arkansas',MS:'Mississippi',KS:'Kansas',NM:'New Mexico',NE:'Nebraska',ID:'Idaho',WV:'West Virginia',HI:'Hawaii',NH:'New Hampshire',ME:'Maine',MT:'Montana',RI:'Rhode Island',DE:'Delaware',SD:'South Dakota',ND:'North Dakota',AK:'Alaska',VT:'Vermont',WY:'Wyoming',DC:'District of Columbia'};
-
-  function el(id) { return document.getElementById(id); }
-
-  function showError(sectionIds, msg) {
-    sectionIds.forEach(function(id) {
-      var e = el(id);
-      if (e) e.innerHTML = '<span class="loading" style="animation:none;color:#f87171;">' + msg + '</span>';
-    });
-  }
-
-  // ── Populate TTB section ──
-  function populateTTB(ttb) {
-    el('ttb-total-labels').textContent = fmt(ttb.total_labels);
-    el('ttb-companies').textContent = fmt(ttb.dim_companies_count);
-    el('ttb-products').textContent = fmt(ttb.dim_products_count);
-    el('ttb-categories').textContent = fmt(ttb.distinct_categories);
-    el('ttb-origins').textContent = fmt(ttb.distinct_origins);
-
-    var earliest = formatDate(ttb.earliest_partition);
-    var latest = formatDate(ttb.latest_partition);
-    el('ttb-hero-context').innerHTML =
-      '<span class="live-dot"></span>' +
-      earliest + ' – ' + latest + ' &nbsp;·&nbsp; ' + ttb.days_loaded + ' days of data';
-
-  }
-
-  // ── Populate NABCA section ──
-  function populateNABCA(nabca) {
-    el('nabca-total').textContent = fmt(nabca.total_records);
-    el('nabca-hero-context').innerHTML =
-      '<span class="live-dot" style="background:var(--amber);"></span>' +
-      'Across ' + nabca.distinct_periods + ' monthly reporting periods';
-
-    el('nabca-vendor').textContent = fmt(nabca.raw_vendor_summary);
-    el('nabca-brand').textContent = fmt(nabca.raw_brand_summary);
-    el('nabca-leaders').textContent = fmt(nabca.raw_brand_leaders);
-    el('nabca-top-vendors').textContent = fmt(nabca.raw_top100_vendors);
-    el('nabca-cat-vendors').textContent = fmt(nabca.raw_top20_vendors_by_class);
-
-    var summaries = nabca.raw_current_month + nabca.raw_rolling_12m + nabca.raw_ytd;
-    el('nabca-summaries').textContent = fmt(summaries);
-
-    // Month chips
-    var periods = nabca.period_list || [];
-    el('nabca-coverage-heading').innerHTML =
-      '📆 &nbsp;Monthly Coverage &nbsp;—&nbsp; ' + periods.length + ' periods loaded';
-
-    var chipsHtml = '';
-    periods.forEach(function(p, i) {
-      var label = periodToLabel(p.year, p.month);
-      var isLast = (i === periods.length - 1);
-      if (isLast) {
-        chipsHtml += '<span class="month-chip chip-latest">' + label + ' ✓ latest</span>';
-      } else {
-        chipsHtml += '<span class="month-chip chip-filled">' + label + '</span>';
-      }
-    });
-    el('nabca-months-grid').innerHTML = chipsHtml;
-
-    if (periods.length > 0) {
-      var first = periods[0];
-      var last = periods[periods.length - 1];
-      el('nabca-coverage-note').textContent =
-        periodToLabel(first.year, first.month) + ' → ' + periodToLabel(last.year, last.month) +
-        '  ·  ' + periods.length + ' consecutive months';
-
+  // ── Workstream config (issues verified against live DB 2026-03-03) ──
+  const WORKSTREAMS = [
+    {
+      id: 'ttb',
+      name: 'TTB COLA',
+      color: '#3b82f6',
+      priority: 'P1',
+      section: 'core',
+      dataEnv: 'pre-prod',
+      platEnv: 'dev',
+      dueDate: 'TBD',
+      status: 'In Progress',
+      coverage: '2020\u20132026',
+      currentStage: 'ingest',
+      roadmapSnippet: 'Pipeline automation + FK linking',
+      archive: {
+        location: 'S3 + local pickle files',
+        format: 'Raw HTML (Bronze) + Extracted pickle (Silver)',
+        dateRange: '2020-01-01 to 2026-02-13 (2,185 partitions)',
+        notes: 'Full 7-year coverage achieved. 987K label records loaded. Pipeline automation in progress.'
+      },
+      schema: {
+        project: 'amber-tree (xhvsvhiysnacdinclncn)',
+        schemaName: 'ttb',
+        tableCount: 8,
+        tables: ['fact_cola_applications', 'fact_certificates', 'fact_products', 'dim_companies', 'dim_products', 'dim_dates', 'ttb_origin_codes', 'ttb_product_class_types'],
+        pattern: 'Star schema (facts + dimensions)'
+      },
+      issues: [
+        'company_id FK is NULL on 56% of fact_cola_applications (548K/987K rows)',
+        'product_id FK is clean (<0.1% null \u2014 523/987K rows)',
+        'Pipeline automation not yet in production'
+      ],
+      nextSteps: [
+        'Execute company_id FK linking (dim_companies \u2192 fact_cola_applications)',
+        'Complete pipeline automation for ongoing ingestion',
+        'Run full validation across 2020\u20132026'
+      ]
+    },
+    {
+      id: 'nabca',
+      name: 'NABCA',
+      color: '#f59e0b',
+      priority: 'P1',
+      section: 'core',
+      dataEnv: 'pre-prod',
+      platEnv: 'dev',
+      dueDate: 'TBD',
+      status: 'In Progress',
+      coverage: 'Jul 2024\u2013Dec 2025 (18 periods)',
+      currentStage: 'ingest',
+      roadmapSnippet: 'Loading next week + Fact/Dim split',
+      archive: {
+        location: 'Local CSV files',
+        format: 'Monthly CSV exports from NABCA control state reports',
+        dateRange: 'July 2024 \u2013 December 2025 (18 periods)',
+        notes: 'Ashray completed pipeline. 850K total records across 8 raw tables. Fact/Dim split planned.'
+      },
+      schema: {
+        project: 'amber-tree (xhvsvhiysnacdinclncn)',
+        schemaName: 'nabca-pre-prod',
+        tableCount: 8,
+        tables: ['raw_vendor_summary', 'raw_brand_summary', 'raw_brand_leaders', 'raw_top100_vendors', 'raw_top20_vendors_by_class', 'raw_current_month', 'raw_rolling_12m', 'raw_ytd'],
+        pattern: 'Raw staging \u2192 Fact/Dim split planned'
+      },
+      issues: [
+        'Only raw staging tables exist \u2014 no fact/dim tables yet',
+        'Brand names heavily abbreviated (e.g., "JK DNLS OLD #7" for Jack Daniel\'s)',
+        'Category codes not decoded (SPRTS, WHY, VDK)'
+      ],
+      nextSteps: [
+        'Begin data loading (next week)',
+        'Design and execute Fact/Dim split into star schema',
+        'Build brand_mapping and ref_category_codes tables'
+      ]
+    },
+    {
+      id: 'market_intel',
+      name: 'Accounts / Market Intel',
+      color: '#22c55e',
+      priority: 'P1',
+      section: 'core',
+      dataEnv: 'pre-prod',
+      platEnv: 'dev',
+      dueDate: 'TBD',
+      status: 'In Review',
+      coverage: '48 states \u00B7 169K licenses',
+      currentStage: 'model',
+      roadmapSnippet: 'Verification at scale',
+      archive: {
+        location: 'State databases + US Census Bureau',
+        format: 'Scraped state liquor license DBs + Census CSV downloads',
+        dateRange: '48 states (core 5: TX 74K, FL 51K, PA 18K, AZ 14K, NJ 10K)',
+        notes: '169K licenses across 48 states. 139K unique businesses. Census data at ZIP level. Verification pending at expanded scale.'
+      },
+      schema: {
+        project: 'red-grass (tnricrwvrnsnfbvrvoor)',
+        schemaName: 'market_intel',
+        tableCount: 7,
+        tables: ['standardized_licenses', 'license_types', 'census_demographics', 'census_economics', 'census_education', 'zip_county_crosswalk', 'zip_dma_crosswalk'],
+        pattern: 'Reference + crosswalk tables'
+      },
+      issues: [
+        '60 license records have NULL state',
+        '43 of 48 states have sparse data (\u003C2K records each) \u2014 core 5 states hold 98%',
+        '202 license types need standardization review at 48-state scale'
+      ],
+      nextSteps: [
+        'Verify license types and filters across all 48 states',
+        'Build territory analytics views joining licenses + census',
+        'Investigate sparse states \u2014 data gaps vs. genuinely few licenses'
+      ]
+    },
+    {
+      id: 'publications',
+      name: 'Publications',
+      color: '#2dd4bf',
+      priority: 'P2',
+      section: 'core',
+      dataEnv: 'pre-prod',
+      platEnv: 'dev',
+      dueDate: 'TBD',
+      status: 'Modeled',
+      coverage: 'Jan 2024\u2013Feb 2026 \u00B7 14K articles',
+      currentStage: 'model',
+      roadmapSnippet: 'Build production ingestion pipeline',
+      archive: {
+        location: 'Web scraping pipeline',
+        format: 'Scraped HTML \u2192 parsed articles',
+        dateRange: 'Jan 2024 \u2013 Feb 2026 (14,069 articles)',
+        notes: 'Star schema complete. 14,047/14,069 articles cleaned (99.8%). 5 sources, 11,973 keywords, 72K keyword maps. Data current through Feb 27, 2026.'
+      },
+      schema: {
+        project: 'red-grass (tnricrwvrnsnfbvrvoor)',
+        schemaName: 'publications',
+        tableCount: 6,
+        tables: ['articles', 'articles_clean', 'keyword_article_map', 'dim_sources', 'dim_keywords', 'dim_keyword_types'],
+        pattern: 'Star schema (articles + keyword dimensions)'
+      },
+      issues: [
+        '22 articles not yet cleaned (14,047/14,069 = 99.8%)',
+        'Only 5 sources \u2014 could expand for broader coverage',
+        'No automated production ingestion pipeline'
+      ],
+      nextSteps: [
+        'Build automated production ingestion pipeline',
+        'Expand source coverage beyond current 5 publications',
+        'Expand keyword taxonomy (currently 11,973 keywords)'
+      ]
+    },
+    {
+      id: 'state_regs',
+      name: 'State Regulations',
+      color: '#a78bfa',
+      priority: 'P2',
+      section: 'core',
+      dataEnv: 'dev',
+      platEnv: null,
+      dueDate: 'TBD',
+      status: 'Early Stage',
+      coverage: '\u2014',
+      currentStage: 'archive',
+      roadmapSnippet: 'Schema design in progress',
+      archive: {
+        location: 'State regulatory databases',
+        format: 'Scraped / structured regulation data',
+        dateRange: 'In progress',
+        notes: 'Still early stage. Separate schema being designed for state-level regulatory data.'
+      },
+      schema: {
+        project: 'TBD',
+        schemaName: 'Separate schema (planned)',
+        tableCount: 0,
+        tables: [],
+        pattern: 'Separate schema in design'
+      },
+      issues: [
+        'Schema design not finalized',
+        'Data sources vary by state',
+        'Regulatory text parsing complexity'
+      ],
+      nextSteps: [
+        'Finalize separate schema design',
+        'Complete initial state data ingestion',
+        'Define standardized regulation categories'
+      ]
+    },
+    {
+      id: 'menu_data',
+      name: 'Menu Data',
+      color: '#fb923c',
+      priority: 'P3',
+      section: 'core',
+      dataEnv: null,
+      platEnv: null,
+      dueDate: 'TBD',
+      status: 'Not Started',
+      coverage: '\u2014',
+      currentStage: null,
+      roadmapSnippet: 'Sourcing & schema design',
+      archive: {
+        location: 'Not started',
+        format: 'TBD (restaurant menu sources)',
+        dateRange: '\u2014',
+        notes: 'Focus on Florida restaurants. Scope and data sources to be defined.'
+      },
+      schema: {
+        project: 'TBD',
+        schemaName: 'TBD',
+        tableCount: 0,
+        tables: [],
+        pattern: 'Not designed yet'
+      },
+      issues: [
+        'No schema or data sources defined',
+        'Scope limited to Florida initially',
+        'Menu data format highly variable'
+      ],
+      nextSteps: [
+        'Identify Florida restaurant menu data sources',
+        'Design schema for menu/beverage list data',
+        'Build ingestion pipeline prototype'
+      ]
+    },
+    {
+      id: 'sera_luce',
+      name: 'Sera Luce',
+      color: '#f472b6',
+      priority: 'P1',
+      section: 'customer',
+      dataEnv: 'pre-prod',
+      platEnv: 'dev',
+      dueDate: 'TBD',
+      status: 'In Progress',
+      coverage: 'Oct 2019\u2013Jan 2026 \u00B7 1.9K orders',
+      currentStage: 'model',
+      roadmapSnippet: 'Pricing data + dashboard build',
+      archive: {
+        location: 'Artisans & Vines distributor exports',
+        format: 'Excel exports \u2192 raw staging tables',
+        dateRange: 'October 2019 \u2013 January 2026',
+        notes: 'Full star schema built. 1,981 fact orders from Artisans & Vines. 288 customers across MD/DC/VA. 2 products (keg + can). QT dashboard data (4,406 rows) also loaded.'
+      },
+      schema: {
+        project: 'amber-tree (xhvsvhiysnacdinclncn)',
+        schemaName: 'sera_luce',
+        tableCount: 13,
+        tables: ['fact_distributor_orders', 'dim_product', 'dim_distributor', 'dim_customer', 'dim_date', 'dim_sales_rep', 'map_product_code', 'raw_artisans_orders', 'raw_qt_dashboard', 'raw_product_codes', 'raw_customer_mapping', 'raw_located_map', 'raw_locations'],
+        pattern: 'Star schema (fact + 6 dims) + 6 raw staging'
+      },
+      issues: [
+        'unit_price and total_dollars are NULL on all 1,981 fact orders \u2014 pricing data not yet loaded',
+        'sales_rep_id is NULL on 3 orders',
+        'Only 1 of 6 distributors (Artisans & Vines) has order data \u2014 Banville, Curated, Orsini, Vintage Imports, PAL have 0 orders',
+        'dim_product has only 2 products (20L keg + 250ml can)'
+      ],
+      nextSteps: [
+        'Load pricing data (unit_price + total_dollars) into fact_distributor_orders',
+        'Ingest additional distributor order data beyond A&V',
+        'Build Sera Luce dashboard views for customer reporting',
+        'Validate customer geocoding (lat/lng) in dim_customer'
+      ]
     }
+  ];
+
+  // ── Roadmap config ──
+  const ROADMAP = [
+    {
+      priority: 'P1 \u2014 Immediate',
+      color: '#ef4444',
+      items: [
+        { ws: 'ttb', text: 'Execute company_id FK linking (56% null) + complete pipeline automation' },
+        { ws: 'nabca', text: 'Begin NABCA data loading + design Fact/Dim split' },
+        { ws: 'market_intel', text: 'Verify license types and filters across all 48 states' },
+        { ws: 'sera_luce', text: 'Load pricing data (unit_price + total_dollars) + build customer dashboard' }
+      ]
+    },
+    {
+      priority: 'P2 \u2014 Near-term',
+      color: '#f59e0b',
+      items: [
+        { ws: 'publications', text: 'Build automated production ingestion pipeline' },
+        { ws: 'state_regs', text: 'Finalize separate schema for state regulations' },
+        { ws: 'nabca', text: 'Build brand mapping table + decode category codes' },
+        { ws: 'market_intel', text: 'Build territory analytics views (licenses + census)' }
+      ]
+    },
+    {
+      priority: 'P3 \u2014 Future',
+      color: '#4a5a70',
+      items: [
+        { ws: 'menu_data', text: 'Identify Florida restaurant menu data sources & design schema' },
+        { ws: 'publications', text: 'Expand source and keyword coverage' },
+        { ws: 'ttb', text: 'Run full validation across all 7 years (2020\u20132026)' },
+        { ws: 'sera_luce', text: 'Ingest additional distributor order data beyond A&V' }
+      ]
+    }
+  ];
+
+  // ── Helper: get workstream by id ──
+  function getWS(id) { return WORKSTREAMS.find(function(w) { return w.id === id; }); }
+
+  // ── Animated count-up ──
+  function countUp(el, target, duration) {
+    if (target == null || isNaN(target)) { el.textContent = fmt(target); return; }
+    var numTarget = Number(target);
+    if (numTarget === 0) { el.textContent = '0'; return; }
+    var startTime = null;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.round(numTarget * eased);
+      el.textContent = fmt(current);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
 
-  // ── Populate Publications section ──
-  function populatePublications(pub) {
-    el('pub-total').textContent = fmt(pub.total_articles);
-    el('pub-keywords').textContent = fmt(pub.keyword_article_map_count);
-    el('pub-sources').textContent = fmt(pub.distinct_sources);
-    el('pub-clean').textContent = fmt(pub.articles_clean_count);
-
-    el('pub-hero-context').innerHTML =
-      '<span class="live-dot" style="background:var(--teal);"></span>' +
-      pub.distinct_sources + ' publication sources &nbsp;·&nbsp; Latest: ' + formatDate(pub.latest_publication_date);
-
-    // Source bars
-    var sources = pub.source_breakdown || [];
-    var maxCount = sources.length > 0 ? sources[0].count : 1;
+  // ── Render a single kanban row ──
+  function renderKanbanRow(ws) {
+    var stageIndex = ws.currentStage ? STAGES.indexOf(ws.currentStage) : -1;
+    var pClass = ws.priority === 'P1' ? 'p1' : ws.priority === 'P2' ? 'p2' : 'p3';
     var html = '';
-    sources.forEach(function(s) {
-      var pct = ((s.count / pub.total_articles) * 100).toFixed(1);
-      html +=
-        '<div class="source-row">' +
-          '<div class="source-top">' +
-            '<span class="source-name">' + escHtml(s.source_desc) + '</span>' +
-            '<div class="source-meta">' +
-              '<span class="source-count">' + fmt(s.count) + '</span>' +
-              '<span class="source-date">latest ' + formatDateShort(s.latest_date) + '</span>' +
-            '</div>' +
-          '</div>' +
-          '<div class="source-bar-track">' +
-            '<div class="source-bar-fill" style="width:' + pct + '%;"></div>' +
-          '</div>' +
-        '</div>';
-    });
-    el('pub-source-list').innerHTML = html;
 
+    var progressNum = ws.currentStage === null ? 0 : stageIndex + 1;
+    var progressTotal = STAGES.length;
+
+    html += '<div class="kanban-row" data-ws="' + ws.id + '" onclick="toggleDetail(\'' + ws.id + '\')" style="border-left-color:' + ws.color + ';">';
+
+    // Workstream name column
+    html += '<div class="kanban-workstream"><div class="ws-dot" style="background:' + ws.color + ';"></div>';
+    html += '<div class="ws-name-group">';
+    html += '<div class="ws-name-row">' + esc(ws.name) + ' <span class="priority-badge ' + pClass + '">' + ws.priority + '</span>';
+    html += ' <span class="progress-fraction">' + progressNum + '/' + progressTotal + '</span>';
+    html += '</div>';
+    var metaText = ws.coverage !== '\u2014' ? ws.coverage : ws.status;
+    html += '<div class="ws-meta">' + esc(metaText) + '</div>';
+    html += '</div></div>';
+
+    // Stage columns
+    html += '<div class="kanban-stages-row" style="display:contents;">';
+    STAGES.forEach(function(stage, i) {
+      var cls = 'stage-pill ';
+      var content = '';
+
+      if (ws.currentStage === null) {
+        cls += 'not-started';
+        content = '\u2014';
+      } else if (i < stageIndex) {
+        cls += 'completed';
+        content = '\u2713';
+      } else if (i === stageIndex) {
+        cls += 'current';
+        content = '\u25CF';
+      } else {
+        cls += 'future';
+        content = '\u2014';
+      }
+
+      var pillStyle = '';
+      if (i === stageIndex && ws.currentStage !== null) {
+        pillStyle = ' style="border-color:#f59e0b; color:#f59e0b; background:rgba(245,158,11,.08);"';
+      }
+      html += '<div class="kanban-stage"><span class="' + cls + '" data-label="' + STAGE_LABELS[stage] + '"' + pillStyle + '>' + content + '</span></div>';
+    });
+    html += '</div>';
+
+    // Roadmap column
+    html += '<div class="kanban-stage">';
+    if (ws.roadmapSnippet) {
+      html += '<a href="#roadmap-section" class="roadmap-col-link" onclick="event.stopPropagation();">' + esc(ws.roadmapSnippet) + '</a>';
+    } else {
+      html += '<span style="color:var(--dim);font-size:11px;">\u2014</span>';
+    }
+    html += '</div>';
+
+    // Data Environment column
+    var dataEnvLabel = ENV_LABELS[ws.dataEnv] || 'N/A';
+    var dataEnvClass = ENV_CLASSES[ws.dataEnv] || 'env-na';
+    html += '<div class="kanban-stage"><span class="env-pill ' + dataEnvClass + '">' + dataEnvLabel + '</span></div>';
+
+    // Platform Environment column
+    var platEnvLabel = ENV_LABELS[ws.platEnv] || 'N/A';
+    var platEnvClass = ENV_CLASSES[ws.platEnv] || 'env-na';
+    html += '<div class="kanban-stage"><span class="env-pill ' + platEnvClass + '">' + platEnvLabel + '</span></div>';
+
+    html += '</div>';
+
+    // Detail panel
+    html += '<div class="detail-panel" id="detail-' + ws.id + '">';
+    html += renderDetailPanel(ws);
+    html += '</div>';
+
+    return html;
   }
 
-  // ── Populate Market Intel section ──
-  function populateMarketIntel(mi) {
-    el('mi-total').textContent = fmt(mi.total_market_intel_records);
-    el('mi-licenses').textContent = fmt(mi.standardized_licenses_count);
-    el('mi-businesses').textContent = fmt(mi.unique_businesses);
-    el('mi-license-types').textContent = fmt(mi.license_types_count);
+  // ── Render Kanban board ──
+  function renderKanban() {
+    var body = document.getElementById('kanban-body');
+    var html = '';
 
-    el('mi-hero-context').innerHTML =
-      '<span class="live-dot" style="background:var(--green);"></span>' +
-      mi.states_count + ' states &nbsp;·&nbsp; ' + fmt(mi.unique_businesses) + ' unique businesses &nbsp;·&nbsp; Latest extraction: ' + formatDate(mi.latest_extraction_date);
+    var coreWS = WORKSTREAMS.filter(function(w) { return w.section === 'core'; });
+    var customerWS = WORKSTREAMS.filter(function(w) { return w.section === 'customer'; });
 
-    // State bars
-    var states = mi.state_breakdown || [];
-    var totalLicenses = mi.standardized_licenses_count || 1;
-    var stateHtml = '';
-    states.forEach(function(s) {
-      var pct = ((s.count / totalLicenses) * 100).toFixed(1);
-      var name = STATE_NAMES[s.state] || s.state;
-      stateHtml +=
-        '<div class="source-row">' +
-          '<div class="source-top">' +
-            '<span class="source-name">' + escHtml(name) + '</span>' +
-            '<div class="source-meta">' +
-              '<span class="source-count" style="color:var(--green);">' + fmt(s.count) + '</span>' +
-              '<span class="source-date">' + pct + '%</span>' +
-            '</div>' +
-          '</div>' +
-          '<div class="source-bar-track">' +
-            '<div class="source-bar-fill" style="width:' + pct + '%; background:linear-gradient(90deg,#22c55e,#16a34a);"></div>' +
-          '</div>' +
-        '</div>';
+    coreWS.forEach(function(ws) {
+      html += renderKanbanRow(ws);
     });
-    el('mi-state-list').innerHTML = stateHtml;
 
-    // Tier breakdown
-    var tierMap = {};
-    (mi.tier_breakdown || []).forEach(function(t) {
-      tierMap[t.tier] = t.count;
-    });
-    el('mi-tier-retail').textContent = fmt(tierMap['Retail'] || 0);
-    el('mi-tier-manufacturing').textContent = fmt(tierMap['Manufacturing'] || 0);
-    el('mi-tier-distribution').textContent = fmt(tierMap['Distribution'] || 0);
-    el('mi-tier-other').textContent = fmt(tierMap['Other'] || 0);
+    if (customerWS.length > 0) {
+      html += '<div class="section-divider"><div class="section-divider-line"></div><span class="section-divider-label">Customer Projects</span><div class="section-divider-line"></div></div>';
+      customerWS.forEach(function(ws) {
+        html += renderKanbanRow(ws);
+      });
+    }
 
-    // Census & reference
-    el('mi-census-demo').textContent = fmt(mi.census_demographics_count);
-    el('mi-census-econ').textContent = fmt(mi.census_economics_count);
-    el('mi-census-edu').textContent = fmt(mi.census_education_count);
-    el('mi-license-defs').textContent = fmt(mi.license_types_ref_count);
-    el('mi-zip-county').textContent = fmt(mi.zip_county_crosswalk_count);
-    el('mi-zip-dma').textContent = fmt(mi.zip_dma_crosswalk_count);
-
+    body.innerHTML = html;
   }
 
-  function escHtml(str) {
+  // ── Render detail panel for a workstream ──
+  function renderDetailPanel(ws) {
+    var h = '<div class="detail-grid">';
+
+    // Card 1: Archive
+    h += '<div class="detail-card">';
+    h += '<div class="detail-card-title">\uD83D\uDCC1 Archive</div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Location</span><span class="detail-item-value">' + esc(ws.archive.location) + '</span></div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Format</span><span class="detail-item-value" style="font-family:inherit;font-size:12px;">' + esc(ws.archive.format) + '</span></div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Date range</span><span class="detail-item-value">' + esc(ws.archive.dateRange) + '</span></div>';
+    h += '<div style="font-size:12px;color:var(--dim);margin-top:10px;">' + esc(ws.archive.notes) + '</div>';
+    h += '</div>';
+
+    // Card 2: Live Database Stats
+    h += '<div class="detail-card">';
+    h += '<div class="detail-card-title">\uD83D\uDCCA Live Stats</div>';
+    h += renderLiveStats(ws);
+    h += '</div>';
+
+    // Card 3: Schema
+    h += '<div class="detail-card">';
+    h += '<div class="detail-card-title">\uD83D\uDDC3\uFE0F Schema</div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Project</span><span class="detail-item-value" style="font-size:11px;">' + esc(ws.schema.project) + '</span></div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Schema</span><span class="detail-item-value">' + esc(ws.schema.schemaName) + '</span></div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Tables</span><span class="detail-item-value">' + ws.schema.tableCount + '</span></div>';
+    h += '<div class="detail-item"><span class="detail-item-label">Pattern</span><span class="detail-item-value" style="font-family:inherit;font-size:12px;">' + esc(ws.schema.pattern) + '</span></div>';
+    if (ws.schema.tables.length > 0) {
+      h += '<div class="table-chips">';
+      ws.schema.tables.forEach(function(t) {
+        h += '<span class="table-chip">' + esc(t) + '</span>';
+      });
+      h += '</div>';
+    }
+    h += '</div>';
+
+    // Card 4: Issues & Next Steps
+    h += '<div class="detail-card">';
+    h += '<div class="detail-card-title">\u26A0\uFE0F Issues & Next Steps</div>';
+    h += '<div class="sub-heading">Known Issues</div>';
+    h += '<ul class="issue-list">';
+    ws.issues.forEach(function(issue) {
+      h += '<li>' + esc(issue) + '</li>';
+    });
+    h += '</ul>';
+    h += '<div class="sub-heading">Next Steps</div>';
+    h += '<ul class="next-list">';
+    ws.nextSteps.forEach(function(step) {
+      h += '<li>' + esc(step) + '</li>';
+    });
+    h += '</ul>';
+    h += '</div>';
+
+    h += '</div>';
+    return h;
+  }
+
+  // ── Render rich live stats per workstream ──
+  function renderLiveStats(ws) {
+    var h = '';
+
+    if (ws.id === 'ttb') {
+      h += '<div class="stat-mini-cards">';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" style="color:' + ws.color + ';" id="ttb-stat-labels"><span class="loading">--</span></div><div class="stat-mini-label">Labels</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="ttb-stat-companies"><span class="loading">--</span></div><div class="stat-mini-label">Companies</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="ttb-stat-products"><span class="loading">--</span></div><div class="stat-mini-label">Products</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="ttb-stat-categories"><span class="loading">--</span></div><div class="stat-mini-label">Categories</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="ttb-stat-origins"><span class="loading">--</span></div><div class="stat-mini-label">Origins</div></div>';
+      h += '</div>';
+      h += '<div style="font-size:12px;color:var(--dim);margin-top:10px;" id="ttb-stat-daterange"><span class="loading">Loading date range...</span></div>';
+
+    } else if (ws.id === 'nabca') {
+      h += '<div class="stat-mini-cards">';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" style="color:' + ws.color + ';" id="nabca-stat-records"><span class="loading">--</span></div><div class="stat-mini-label">Total Records</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="nabca-stat-periods"><span class="loading">--</span></div><div class="stat-mini-label">Periods</div></div>';
+      h += '</div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">Table Breakdown</div>';
+      h += '<div id="nabca-stat-breakdown"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">Period Coverage</div>';
+      h += '<div id="nabca-stat-months"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+
+    } else if (ws.id === 'publications') {
+      h += '<div class="stat-mini-cards">';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" style="color:' + ws.color + ';" id="pub-stat-articles"><span class="loading">--</span></div><div class="stat-mini-label">Articles</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="pub-stat-keywords"><span class="loading">--</span></div><div class="stat-mini-label">Keywords</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="pub-stat-sources"><span class="loading">--</span></div><div class="stat-mini-label">Sources</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="pub-stat-processed"><span class="loading">--</span></div><div class="stat-mini-label">Processed</div></div>';
+      h += '</div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">Source Breakdown</div>';
+      h += '<div id="pub-stat-source-breakdown"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+
+    } else if (ws.id === 'market_intel') {
+      h += '<div class="stat-mini-cards">';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" style="color:' + ws.color + ';" id="mi-stat-total"><span class="loading">--</span></div><div class="stat-mini-label">Total Records</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="mi-stat-licenses"><span class="loading">--</span></div><div class="stat-mini-label">Licenses</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="mi-stat-businesses"><span class="loading">--</span></div><div class="stat-mini-label">Businesses</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="mi-stat-states"><span class="loading">--</span></div><div class="stat-mini-label">States</div></div>';
+      h += '</div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">By State</div>';
+      h += '<div id="mi-stat-state-breakdown"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">By Tier</div>';
+      h += '<div id="mi-stat-tier-breakdown"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">Census & Reference</div>';
+      h += '<div id="mi-stat-census"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+
+    } else if (ws.id === 'sera_luce') {
+      h += '<div class="stat-mini-cards">';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" style="color:' + ws.color + ';" id="sl-stat-orders"><span class="loading">--</span></div><div class="stat-mini-label">Orders</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="sl-stat-qty"><span class="loading">--</span></div><div class="stat-mini-label">Qty Ordered</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="sl-stat-customers"><span class="loading">--</span></div><div class="stat-mini-label">Customers</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="sl-stat-products"><span class="loading">--</span></div><div class="stat-mini-label">Products</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="sl-stat-distributors"><span class="loading">--</span></div><div class="stat-mini-label">Active Distrib.</div></div>';
+      h += '<div class="stat-mini-card"><div class="stat-mini-value" id="sl-stat-reps"><span class="loading">--</span></div><div class="stat-mini-label">Sales Reps</div></div>';
+      h += '</div>';
+      h += '<div style="font-size:12px;color:var(--dim);margin-top:10px;" id="sl-stat-daterange"><span class="loading">Loading date range...</span></div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">By State</div>';
+      h += '<div id="sl-stat-state-breakdown"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">By Division</div>';
+      h += '<div id="sl-stat-division-breakdown"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+      h += '<div class="sub-heading" style="margin-top:14px;">Products</div>';
+      h += '<div id="sl-stat-product-list"><span class="loading" style="font-size:12px;">Loading...</span></div>';
+
+    } else {
+      h += '<div style="font-size:12px;color:var(--dim);">No live data available</div>';
+    }
+
+    return h;
+  }
+
+  // ── Render Roadmap ──
+  function renderRoadmap() {
+    var body = document.getElementById('roadmap-body');
+    var html = '';
+
+    ROADMAP.forEach(function(group) {
+      html += '<div class="roadmap-group">';
+      html += '<div class="roadmap-group-label"><div class="priority-dot" style="background:' + group.color + ';"></div><span style="color:' + group.color + ';">' + group.priority + ' Priority</span></div>';
+      html += '<div class="roadmap-items">';
+
+      group.items.forEach(function(item) {
+        var ws = getWS(item.ws);
+        var dimClass = group.priority.indexOf('Future') !== -1 ? ' dim' : '';
+        html += '<div class="roadmap-item' + dimClass + '">';
+        html += '<span class="roadmap-ws-pill" style="background:' + ws.color + '18; border:1px solid ' + ws.color + '40; color:' + ws.color + ';">' + ws.name + '</span>';
+        html += '<span class="roadmap-item-text">' + esc(item.text) + '</span>';
+        html += '</div>';
+      });
+
+      html += '</div></div>';
+    });
+
+    body.innerHTML = html;
+  }
+
+  // ── Toggle detail panel with smooth animation ──
+  window.toggleDetail = function(wsId) {
+    var panel = document.getElementById('detail-' + wsId);
+    var row = document.querySelector('.kanban-row[data-ws="' + wsId + '"]');
+    var isOpen = panel.classList.contains('open');
+
+    document.querySelectorAll('.detail-panel.open').forEach(function(p) {
+      p.classList.remove('open');
+    });
+    document.querySelectorAll('.kanban-row.expanded').forEach(function(r) {
+      r.classList.remove('expanded');
+    });
+
+    if (!isOpen) {
+      panel.classList.add('open');
+      row.classList.add('expanded');
+      history.replaceState(null, '', '#' + wsId);
+    } else {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  };
+
+  // ── HTML escape ──
+  function esc(str) {
     var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
+    div.appendChild(document.createTextNode(str || ''));
     return div.innerHTML;
   }
 
-  // ── Fetch & render ──
+  // ── Animated safe element setter ──
+  function setVal(id, value) {
+    var e = document.getElementById(id);
+    if (e) countUp(e, value, 600);
+  }
+
+  // ── Show error state for a workstream's stats ──
+  function showStatError(wsId) {
+    var panel = document.getElementById('detail-' + wsId);
+    if (panel) {
+      panel.querySelectorAll('.loading').forEach(function(el) {
+        el.className = 'error-state';
+        el.textContent = 'Failed to load';
+      });
+    }
+  }
+
+  // ── Check data staleness ──
+  function checkStaleness(dateStr, containerId) {
+    if (!dateStr) return;
+    var date = new Date(dateStr);
+    var daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysAgo > 30) {
+      var container = document.getElementById(containerId);
+      if (container) {
+        var badge = document.createElement('span');
+        badge.className = 'stale-badge';
+        badge.textContent = 'Stale: ' + daysAgo + 'd ago';
+        container.appendChild(badge);
+      }
+    }
+  }
+
+  // ── Keyboard navigation ──
+  var focusedRowIndex = -1;
+
+  document.addEventListener('keydown', function(e) {
+    var rows = document.querySelectorAll('.kanban-row');
+    if (!rows.length) return;
+
+    if (e.key === 'ArrowDown' || e.key === 'j') {
+      e.preventDefault();
+      focusedRowIndex = Math.min(focusedRowIndex + 1, rows.length - 1);
+      updateRowFocus(rows);
+    } else if (e.key === 'ArrowUp' || e.key === 'k') {
+      e.preventDefault();
+      focusedRowIndex = Math.max(focusedRowIndex - 1, 0);
+      updateRowFocus(rows);
+    } else if ((e.key === 'Enter' || e.key === ' ') && focusedRowIndex >= 0) {
+      e.preventDefault();
+      var wsId = rows[focusedRowIndex].getAttribute('data-ws');
+      if (wsId) window.toggleDetail(wsId);
+    } else if (e.key === 'Escape') {
+      document.querySelectorAll('.detail-panel.open').forEach(function(p) { p.classList.remove('open'); });
+      document.querySelectorAll('.kanban-row.expanded').forEach(function(r) { r.classList.remove('expanded'); });
+      document.querySelectorAll('.kanban-row.keyboard-focus').forEach(function(r) { r.classList.remove('keyboard-focus'); });
+      focusedRowIndex = -1;
+      history.replaceState(null, '', window.location.pathname);
+    }
+  });
+
+  function updateRowFocus(rows) {
+    rows.forEach(function(r, i) {
+      if (i === focusedRowIndex) {
+        r.classList.add('keyboard-focus');
+      } else {
+        r.classList.remove('keyboard-focus');
+      }
+    });
+    if (focusedRowIndex >= 0 && rows[focusedRowIndex]) {
+      rows[focusedRowIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+
+  document.addEventListener('mousedown', function() {
+    document.querySelectorAll('.kanban-row.keyboard-focus').forEach(function(r) { r.classList.remove('keyboard-focus'); });
+    focusedRowIndex = -1;
+  });
+
+  // ── Fetch live data & render ──
   document.addEventListener('DOMContentLoaded', async function() {
+    renderKanban();
+    renderRoadmap();
+
+    // Deep-link to workstream via URL hash
+    var hash = window.location.hash.replace('#', '');
+    if (hash && document.getElementById('detail-' + hash)) {
+      window.toggleDetail(hash);
+      var targetRow = document.querySelector('.kanban-row[data-ws="' + hash + '"]');
+      if (targetRow) {
+        setTimeout(function() {
+          targetRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 150);
+      }
+    }
+
     var loadStart = Date.now();
 
     try {
@@ -917,55 +1513,194 @@ body {
         redGrass.rpc('get_bevgenie_dashboard_red')
       ]);
 
-      // TTB + NABCA (amber-tree)
+      // ── TTB + NABCA + Sera Luce ──
       if (amberResult.status === 'fulfilled' && !amberResult.value.error) {
         var amber = amberResult.value.data;
-        populateTTB(amber.ttb);
-        populateNABCA(amber.nabca);
-      } else {
-        var errMsg = 'Failed to load';
-        if (amberResult.status === 'fulfilled' && amberResult.value.error) {
-          errMsg = amberResult.value.error.message || errMsg;
+
+        setVal('ttb-stat-labels', amber.ttb.total_labels);
+        setVal('ttb-stat-companies', amber.ttb.dim_companies_count);
+        setVal('ttb-stat-products', amber.ttb.dim_products_count);
+        setVal('ttb-stat-categories', amber.ttb.distinct_categories);
+        setVal('ttb-stat-origins', amber.ttb.distinct_origins);
+
+        var ttbDateRange = document.getElementById('ttb-stat-daterange');
+        if (ttbDateRange) {
+          ttbDateRange.textContent = 'Coverage: ' + (amber.ttb.earliest_partition || '--') + ' to ' + (amber.ttb.latest_partition || '--') + ' (' + fmt(amber.ttb.days_loaded) + ' days)';
+          checkStaleness(amber.ttb.latest_partition, 'ttb-stat-daterange');
         }
-        showError([
-          'ttb-total-labels','ttb-companies','ttb-products','ttb-categories','ttb-origins',
-          'nabca-total','nabca-vendor','nabca-brand','nabca-leaders','nabca-top-vendors','nabca-cat-vendors','nabca-summaries'
-        ], errMsg);
-        el('ttb-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to amber-tree</span>';
-        el('nabca-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to amber-tree</span>';
+
+        setVal('nabca-stat-records', amber.nabca.total_records);
+        setVal('nabca-stat-periods', amber.nabca.distinct_periods);
+
+        var nabcaBreakdown = document.getElementById('nabca-stat-breakdown');
+        if (nabcaBreakdown && amber.nabca) {
+          var bh = '';
+          var tables = [
+            { name: 'Vendor Summary', count: amber.nabca.raw_vendor_summary },
+            { name: 'Brand Summary', count: amber.nabca.raw_brand_summary },
+            { name: 'Brand Leaders', count: amber.nabca.raw_brand_leaders },
+            { name: 'Top 100 Vendors', count: amber.nabca.raw_top100_vendors },
+            { name: 'Top 20 by Class', count: amber.nabca.raw_top20_vendors_by_class },
+            { name: 'Current Month', count: amber.nabca.raw_current_month },
+            { name: 'Rolling 12M', count: amber.nabca.raw_rolling_12m },
+            { name: 'YTD', count: amber.nabca.raw_ytd }
+          ];
+          var maxCount = Math.max.apply(null, tables.map(function(t) { return t.count || 0; }));
+          tables.forEach(function(t) {
+            var pct = maxCount > 0 ? ((t.count || 0) / maxCount * 100) : 0;
+            bh += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">' + esc(t.name) + '</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:' + pct + '%;background:#f59e0b;"></div></div><span class="stat-breakdown-value">' + fmt(t.count) + '</span></div>';
+          });
+          nabcaBreakdown.innerHTML = bh;
+        }
+
+        var nabcaMonths = document.getElementById('nabca-stat-months');
+        if (nabcaMonths && amber.nabca.period_list) {
+          var mh = '<div class="stat-months-grid">';
+          amber.nabca.period_list.forEach(function(p) {
+            mh += '<span class="stat-month-chip">' + MONTH_NAMES[p.month - 1] + ' ' + p.year + '</span>';
+          });
+          mh += '</div>';
+          nabcaMonths.innerHTML = mh;
+        }
+
+        // ── Sera Luce live stats ──
+        if (amber.sera_luce) {
+          var sl = amber.sera_luce;
+
+          setVal('sl-stat-orders', sl.total_orders);
+          setVal('sl-stat-qty', sl.total_qty);
+          setVal('sl-stat-customers', sl.total_customers);
+          setVal('sl-stat-products', sl.total_products);
+          setVal('sl-stat-distributors', sl.active_distributors);
+          setVal('sl-stat-reps', sl.total_sales_reps);
+
+          var slDateRange = document.getElementById('sl-stat-daterange');
+          if (slDateRange) {
+            slDateRange.textContent = 'Coverage: ' + (sl.earliest_date || '--') + ' to ' + (sl.latest_date || '--');
+            checkStaleness(sl.latest_date, 'sl-stat-daterange');
+          }
+
+          // State breakdown
+          var slStates = document.getElementById('sl-stat-state-breakdown');
+          if (slStates && sl.state_breakdown) {
+            var sth = '';
+            var maxSt = Math.max.apply(null, sl.state_breakdown.map(function(s) { return s.count || 0; }));
+            sl.state_breakdown.forEach(function(s) {
+              var pct = maxSt > 0 ? ((s.count || 0) / maxSt * 100) : 0;
+              sth += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">' + esc(s.state) + '</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:' + pct + '%;background:#f472b6;"></div></div><span class="stat-breakdown-value">' + fmt(s.count) + '</span></div>';
+            });
+            slStates.innerHTML = sth;
+          }
+
+          // Division breakdown
+          var slDivs = document.getElementById('sl-stat-division-breakdown');
+          if (slDivs && sl.division_breakdown) {
+            var dh = '';
+            var maxDiv = Math.max.apply(null, sl.division_breakdown.map(function(d) { return d.count || 0; }));
+            sl.division_breakdown.forEach(function(d) {
+              var pct = maxDiv > 0 ? ((d.count || 0) / maxDiv * 100) : 0;
+              dh += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">' + esc(d.division) + '</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:' + pct + '%;background:#f472b6;"></div></div><span class="stat-breakdown-value">' + fmt(d.count) + '</span></div>';
+            });
+            slDivs.innerHTML = dh;
+          }
+
+          // Product list
+          var slProducts = document.getElementById('sl-stat-product-list');
+          if (slProducts && sl.product_list) {
+            var ph = '<div class="table-chips">';
+            sl.product_list.forEach(function(p) {
+              ph += '<span class="table-chip">' + esc(p.name) + ' (' + esc(p.category) + ')</span>';
+            });
+            ph += '</div>';
+            slProducts.innerHTML = ph;
+          }
+        }
+      } else {
+        showStatError('ttb');
+        showStatError('nabca');
+        showStatError('sera_luce');
       }
 
-      // Publications + Market Intel (red-grass)
+      // ── Publications + Market Intel ──
       if (redResult.status === 'fulfilled' && !redResult.value.error) {
         var red = redResult.value.data;
-        populatePublications(red.publications);
-        populateMarketIntel(red.market_intel);
-      } else {
-        var errMsg2 = 'Failed to load';
-        if (redResult.status === 'fulfilled' && redResult.value.error) {
-          errMsg2 = redResult.value.error.message || errMsg2;
+
+        setVal('pub-stat-articles', red.publications.total_articles);
+        setVal('pub-stat-keywords', red.publications.keyword_article_map_count);
+        setVal('pub-stat-sources', red.publications.distinct_sources);
+        setVal('pub-stat-processed', red.publications.articles_clean_count);
+
+        checkStaleness(red.publications.latest_publication_date, 'pub-stat-source-breakdown');
+
+        var pubBreakdown = document.getElementById('pub-stat-source-breakdown');
+        if (pubBreakdown && red.publications.source_breakdown) {
+          var sh = '';
+          var maxSrc = Math.max.apply(null, red.publications.source_breakdown.map(function(s) { return s.count || 0; }));
+          red.publications.source_breakdown.forEach(function(s) {
+            var pct = maxSrc > 0 ? ((s.count || 0) / maxSrc * 100) : 0;
+            sh += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">' + esc(s.source_desc) + '</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:' + pct + '%;background:#2dd4bf;"></div></div><span class="stat-breakdown-value">' + fmt(s.count) + '</span></div>';
+          });
+          pubBreakdown.innerHTML = sh;
         }
-        showError([
-          'pub-total','pub-keywords','pub-sources','pub-clean',
-          'mi-total','mi-licenses','mi-businesses','mi-license-types',
-          'mi-tier-retail','mi-tier-manufacturing','mi-tier-distribution','mi-tier-other',
-          'mi-census-demo','mi-census-econ','mi-census-edu','mi-license-defs','mi-zip-county','mi-zip-dma'
-        ], errMsg2);
-        el('pub-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to red-grass</span>';
-        el('mi-hero-context').innerHTML = '<span style="color:#f87171;">Unable to connect to red-grass</span>';
+
+        setVal('mi-stat-total', red.market_intel.total_market_intel_records);
+        setVal('mi-stat-licenses', red.market_intel.standardized_licenses_count);
+        setVal('mi-stat-businesses', red.market_intel.unique_businesses);
+        setVal('mi-stat-states', red.market_intel.states_count);
+
+        checkStaleness(red.market_intel.latest_extraction_date, 'mi-stat-state-breakdown');
+
+        var miStates = document.getElementById('mi-stat-state-breakdown');
+        if (miStates && red.market_intel.state_breakdown) {
+          var sth = '';
+          var maxState = Math.max.apply(null, red.market_intel.state_breakdown.map(function(s) { return s.count || 0; }));
+          red.market_intel.state_breakdown.forEach(function(s) {
+            var pct = maxState > 0 ? ((s.count || 0) / maxState * 100) : 0;
+            sth += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">' + esc(s.state) + '</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:' + pct + '%;background:#22c55e;"></div></div><span class="stat-breakdown-value">' + fmt(s.count) + '</span></div>';
+          });
+          miStates.innerHTML = sth;
+        }
+
+        var miTiers = document.getElementById('mi-stat-tier-breakdown');
+        if (miTiers && red.market_intel.tier_breakdown) {
+          var tth = '';
+          red.market_intel.tier_breakdown.forEach(function(t) {
+            tth += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">' + esc(t.tier) + '</span><span class="stat-breakdown-value">' + fmt(t.count) + '</span></div>';
+          });
+          miTiers.innerHTML = tth;
+        }
+
+        var miCensus = document.getElementById('mi-stat-census');
+        if (miCensus && red.market_intel) {
+          var ch = '';
+          ch += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">Demographics</span><span class="stat-breakdown-value">' + fmt(red.market_intel.census_demographics_count) + '</span></div>';
+          ch += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">Economics</span><span class="stat-breakdown-value">' + fmt(red.market_intel.census_economics_count) + '</span></div>';
+          ch += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">Education</span><span class="stat-breakdown-value">' + fmt(red.market_intel.census_education_count) + '</span></div>';
+          ch += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">License Types Ref</span><span class="stat-breakdown-value">' + fmt(red.market_intel.license_types_ref_count) + '</span></div>';
+          ch += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">ZIP-County Crosswalk</span><span class="stat-breakdown-value">' + fmt(red.market_intel.zip_county_crosswalk_count) + '</span></div>';
+          ch += '<div class="stat-breakdown-row"><span class="stat-breakdown-label">ZIP-DMA Crosswalk</span><span class="stat-breakdown-value">' + fmt(red.market_intel.zip_dma_crosswalk_count) + '</span></div>';
+          miCensus.innerHTML = ch;
+        }
+      } else {
+        showStatError('publications');
+        showStatError('market_intel');
       }
 
-      // Update timestamp
       var now = new Date();
       var elapsed = ((Date.now() - loadStart) / 1000).toFixed(1);
-      var ts = now.toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'}) +
-               ' at ' + now.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
-      el('snapshot-time').textContent = 'Live · Refreshed ' + ts + ' (' + elapsed + 's)';
-      el('footer-timestamp').textContent = 'Live data as of ' + ts;
+      var ts = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) +
+               ' at ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      document.getElementById('nav-time').textContent = 'Live \u00B7 ' + ts;
+      document.getElementById('footer-timestamp').textContent = 'Live data as of ' + ts + ' (' + elapsed + 's)';
 
     } catch (err) {
-      el('snapshot-time').textContent = 'Error loading data: ' + err.message;
-      el('snapshot-time').style.color = '#f87171';
+      document.getElementById('nav-time').textContent = 'Error: ' + err.message;
+      document.getElementById('nav-time').style.color = '#f87171';
+      showStatError('ttb');
+      showStatError('nabca');
+      showStatError('sera_luce');
+      showStatError('publications');
+      showStatError('market_intel');
     }
   });
 
